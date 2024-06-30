@@ -82,8 +82,8 @@ const partyStore = usePartyStore();
 const party = ref<any[]>([]);
 onMounted(async () => {
   try {
-    party.value = await partyStore.readParty();
-    console.log("Party data fetched:", party.value);
+    const readData = await partyStore.readParty();
+    party.value = readData.results;
   } catch (error) {
     console.error("Error during fetchParty:", error);
   }

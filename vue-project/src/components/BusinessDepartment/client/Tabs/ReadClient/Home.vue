@@ -26,33 +26,46 @@
           </span>
           <span v-else>
             <a @click="edit(record.id)">编辑</a>
-            <a-popconfirm v-if="client.length" title="Sure to delete?" @confirm="onDelete(record.id)">
-              <a style="color:red">删除</a>
-            </a-popconfirm>
-            <DrawerView></DrawerView>
+            <!-- <slot :currentSelectObjID="record.id"></slot> -->
+            <PopconfirmView :id="record.id"></PopconfirmView>
+            <a-button type="primary" @click="showDrawerView(record.id)">查看合同</a-button>
           </span>
         </div>
       </template>
     </template>
   </a-table>
+  <DrawerView ref="drawerref" />
 </template>
 <script lang="ts" setup>
 import { cloneDeep } from 'lodash-es';
-import { onMounted, reactive, ref } from 'vue';
+import { computed, defineAsyncComponent, markRaw, onMounted, reactive, ref } from 'vue';
 import type { UnwrapRef } from 'vue';
 import { clientColumns, type FrontEndClientType ,clientColumnsArr } from '@/api/client'
 import DrawerView from '@/components/BusinessDepartment/client/Tabs/ReadClient/Drawer/Home.vue'
+
+
+// ------ 测试
+// import testView from './testView/Home.vue';
+// const childRef = ref<any>();
+//   const getChild = () => {
+//     // 第三步： 调用子组件的方法或者变量，通过value
+//     childRef.value.doSth();
+// }
+
 
 // ----- pinia 配置数据
 import { useClientStore } from "@/stores/client";
 const clientStore = useClientStore();
 const client = ref<any[]>([]);
+const openDrawer = ref<boolean>(false);
+const drawerref = ref<any>(null);
+
 onMounted(async () => {
   try {
     client.value = await clientStore.read();
-    console.log("Party data fetched:", client.value);
+    console.log("client data fetched:", client.value);
   } catch (error) {
-    console.error("Error during fetchParty:", error);
+    console.error("Error during fetchClient:", error);
   }
 })
 
@@ -71,12 +84,22 @@ const cancel = (id: string) => {
   delete editableData[id]; // 把想退出编辑状态的数据，从 eritableData中删除。
 };
 
-const onDelete = async (id: string) => {
-  await clientStore.delete(id);
-  // dataSource.value = dataSource.value.filter(item => item.id !== id);
-  // 返回一个新的数组，这个数组包含了 dataSource.value 中所有 id 不等于给定 id 的元素。
-};
+
 // 编辑 功能实现 ---------------------------  end  -----------------------------------------
+
+const showDrawerView = (id:string)=>{
+  if(drawerref.value){
+    clientStore.currentSelectObjID = id;
+    drawerref.value.showDrawer();
+  }
+}
+
+// 在按钮点击事件中调用子组件的方法
+// const callChildMethod = () => {
+//   if (childRef.value) {
+//     childRef.value.childMethod();
+//   }
+// };
 
 </script>
 <style scoped>

@@ -13,7 +13,7 @@ export default defineConfig({
   ],
   server: { // 跨域配置
     host: '0.0.0.0', // 允许外部访问
-    port: 5174, // 修改为你使用的端口
+    port: 5175, // 修改为你使用的端口
 		proxy: { //当 axios请求 url中包含 /api, 代理激活会 拦截 axios请求，然后进行修改它的url，用修改后的url去实际请求 API服务器。
        '/api': {
         target: 'http://localhost:3000',
