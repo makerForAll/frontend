@@ -1,8 +1,7 @@
 
 import { defineStore } from 'pinia'
-import request from '@/utils/request'
+// import request from '@/api/request'
 import { message } from 'ant-design-vue'
-// import instance from '@/utils/request'
 
 // 创建 store
 const useUserStore = defineStore('user', {

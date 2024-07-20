@@ -41,7 +41,7 @@ import UpdateClientView from '@/cp-projectCP/ClientHome/UpdateClient/Home3.vue';
 import DeleteClientView from '@/cp-projectCP/ClientHome/DeleteClient/Home.vue';
 
 // 主板-插槽 【抽屉 插槽板】
-import PlanHomeView from '@/cp-projectCP/ClientHome/PlanHome/Home.vue';
+// import PlanHomeView from '@/cp-projectCP/ClientHome/PlanHome/Home.vue';
 
 </script>
 <style scoped></style>

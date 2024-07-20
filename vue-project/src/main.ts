@@ -21,16 +21,18 @@ import Antd from 'ant-design-vue';
 import router from './router'
 
 // ## ------------------------------ dayjs
-// import dayjs from 'dayjs';
-// import 'dayjs/locale/zh-cn';
-// import localizedFormat from 'dayjs/plugin/localizedFormat';
-// dayjs.extend(localizedFormat);
-// dayjs.locale('zh-cn');
+// import dayjsPlugin from '@/plugins/dayjs';
+
+// # ---- vue-print-next 打印预览 ---
+import {printPlugin} from 'vue-print-next';
+
 
 // ------------- begin
 app.use(pinia) // 状态管理
 app.use(Antd); // antd组件库
 app.use(router)// 路由管理
 
-// app.config.globalProperties.$dayjs = dayjs; // 将 dayjs 添加到全局属性中，以便在所有组件中使用
+app.use(printPlugin);
+// app.use(dayjsPlugin, { locale: 'zh-cn' }); // 你可以根据用户偏好或浏览器设置动态设置这里
+
 app.mount('#app')

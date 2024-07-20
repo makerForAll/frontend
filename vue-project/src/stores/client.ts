@@ -1,56 +1,98 @@
-import axios from '@/utils/request';
 import { defineStore } from 'pinia';
 import { message } from 'ant-design-vue';
 
-import { type FrontEndClientType ,  readClientAPI, createClientAPI, updateClientAPI ,deleteClientAPI, type Client, type APIParams, readClientIDAPI} from '@/api/client';
+// import { type Client, type APIParams,} from '@/api/services/';
+import dayjs from 'dayjs';
+// import type { Plan } from '@/api/services/plan';
 
+// ------------------------------------------------------------
+import{ APIforBackEnd, type ClientBackEndDTO} from '@/api'
+import {AxiosHttpRequest } from '@/api/core/AxiosHttpRequest';
+const api = new APIforBackEnd({},AxiosHttpRequest);
+// ------------------------------------------------------------
+
+import type {ApiResults,ApiResponse} from '@/api/custom/models-common'
+import type { FrontEndClientType } from '@/api/custom/client';
+
+// ------------------------------------------------------------
+// 初始化
+// export const initClientForm = {
+//   name: '',
+//   contact:'',
+//   phonenumber: '',
+//   emergencycontact: '',
+//   emergencycontactphone: '',
+//   marks:'',
+//   createdAt:null,
+//   // 其他字段可以按需添加
+// }
 
 export const useClientStore = defineStore('client', {
   // 其他配置...
-  state: () => ({  // 为了解决 前端业务逻辑 区域的 CURD 的需求，需要提供 共享 状态的变量
-    
-    page:{
-      items:[] as Client[],
-      item:{} as Client,
-      updateItem: { } as Client,
-      total: 0 as number|undefined,
-      // updateData:{} as Client,
-    },
-    // readStateData: {} as FrontEndClientType,
-    currentSelectObjID: '',
-    loading:false
-  }),  // store 的数据 (data)
-
+  state: () => {
+    // 可以写一些逻辑
+    return {
+      data: {
+        item:{} ,
+        items:[] as ClientBackEndDTO[],
+        total:0,
+        selectID: '', // 要更新的对象
+        loading:false  // store 的数据 (data)
+      },
+      initialized: false,
+    }
+  },
   getters: {  // store 的计算属性 (computed)
-    // double: (state) => state.count * 2,
+    addTodayTime:(state)=>(data:ClientBackEndDTO)=> {  // 在使用Create时，默认添加注册时间
+      data.createdAt = dayjs() as unknown as string;
+    },
   },
   actions: {  //actions 则是方法 (methods)
+    // async calTotal(){
+    //   this.createState.item.total = this.double;
+    // },
+    // async initStateItem(){
+    //   try{
+    //     const response:ApiResponse<ClientBackEndDTO> = await api.client.clientControllerGetInit();
+    //     this.clientData.item = response?.results.data[0];
+    //     // return 
+    //     console.log("Init -- from BackEnd responseData:-----------",response?.results.data[0]);
+    //     console.log("Init -- from FrontEnd Pinia State Data:-----------", this.clientData.item);
+    //   }catch(error){
+    //     console.error('Error fetching data:', error);
+    //   }
+    //   // this.clientData.items = response?.results?.data;
+    //   // this.createState.item = initClientForm;
+    // },
     async create(data:any){
       try{
-        const createData = await createClientAPI(data);
+        console.log("data:-----------",data);
+        
+        // await this.addTodayTime(data);
+        const createData:ApiResponse<ClientBackEndDTO> = await api.client.clientControllerCreate({requestBody:data});
+        // api.client.clientControllerCreate();
         message.success("创建客户信息成功")
         // 更新本地 state 中的 party 数据 -------------------------------------------
-        // this.page.items.push(createData.results.data[0]);
-        this.page.items.unshift(createData.results.data[0]);
-        // this.read();
-        // --------------------------------------------------------------------------------------
+        console.log("createData:",createData);
         
+        this.data.items.unshift(createData.results.data[0]);
       } catch (error) {
         message.error(`创建失败!:${error}`);
         console.error("创建失败:", error);
         throw error;
       }
     },
-    async read(params:APIParams= {
+    async read(params:any= {
      current: 1,
      pagesize: 10
     }) { // 异步编程获取数据
       try {
-        const data = await readClientAPI(params);
-        this.page.items = data.results.data;
-        this.page.total = data.results.total;
+        const response:ApiResponse<ClientBackEndDTO> = await api.client.clientControllerFindAll(params);
+        // const data = await readClientAPI(params);
+        this.data.items = response.results.data;
+        this.data.total = response.results.total as number;
         // this.readStateData = data;
-        console.log("data:",data);
+        console.log("data:",response.results.data);
         message.success("获取信息成功")
         // return data;
       } catch (error) {
@@ -59,62 +101,51 @@ export const useClientStore = defineStore('client', {
         throw error;
       }
     },
-    async readById(id: string): Promise<Client> {
-      this.loading = true;
+    async readById(id: string): Promise<ClientBackEndDTO> {
+      // this.loading = true;
       try {
-        const data: FrontEndClientType = await readClientIDAPI(id);
-        this.page.updateItem = data.results.data[0];
-        console.log("readById return data--------",data.results.data[0]);
-        return data.results.data[0];
+        
+        const response: ApiResponse<ClientBackEndDTO> = await api.client.clientControllerFindOne({id});
+        const item = response.results.data[0];
+        this.data.item = item;
+        console.log("readById return data--------",item);
+        // ------------------------------
+        return item;
       } catch (error) {
         // this.error = error.message;
-        return {} as Client;
+        return {} as ClientBackEndDTO;
       } finally {
-        this.loading = false;
+        // this.loading = false;
       }
     },
-    async update(id:string,form: any) {
+    async update(id:string,requestBody: any) {
       try {
-        // const response = await axios.put(`/party/${partyItem.id}`, partyItem);
-        await updateClientAPI(id,form);
-        const updateData = await this.readById(id);
-        // console.log("updateData--------------------------------:",updateData);
-        // 更新本地 state 中的 party 数据 -------------------------------------------
-          //使用 更新数据 中 的ID，来寻找 状态数据中的 party的id对比，找到它在 party 数组里的index值。 
-        const index = this.page.items.findIndex((item:Client)=> item.id === id);
-        console.log('index---: ',index);
-        
+        //  向服务器 提出 put更新请求，响应 更新结果
+        const response: ApiResponse<ClientBackEndDTO> = await api.client.clientControllerUpdate({id,requestBody});
+        const item = response.results.data[0]
+        // 向服务器 提出 get 获取指定ID对象 请求， 响应 获取结果
+        // const updateData = await this.readById(id);
+        const index = this.data.items.findIndex((item:any)=> item.id === id);
         if (index !== -1) { // 说明该找到了，有这个值。
           // 更新好的数据 response.data 来 赋值给 this.party[index],（更新了本地的状态数据）
-          console.log('index2---: ',updateData);
-          console.log('index3---: ',this.page.items[index]);
-          this.page.items[index] = updateData;
-          console.log('index4---: ',this.page.items[index]);
-          
+          this.data.items[index] = item;
         }
-        // --------------------------------------------------------------------------------------
         message.success("更新成功!")
-        // return updateData;
       } catch (error) {
         message.error(`请求错误!:${error}`);
         console.error("Error updating data:", error);
         throw error;
       }
     },
-
     async delete(id: string) {
       try {
-        // const response = await axios.delete(`/party/${partyItem.id}`, partyItem);
-        await deleteClientAPI(id);
-        
+        // await deleteClientAPI(id);
+        await api.client.clientControllerDelete({id})
         // 更新本地 state 中的 party 数据 -------------------------------------------
-
-        const index = this.page.items.findIndex((item:Client)=> item.id === id);
-
+        const index = this.data.items.findIndex((item:any)=> item.id === id);
         if(index !== -1){
-          this.page.items.splice(index,1);
-          // console.log("this.readPartyStateData:",this.readStateData);
-          console.log("index:",index);
+          this.data.items.splice(index,1);
+          // console.log("index:",index);
         }
         message.success("删除成功!")
       } catch (error) {

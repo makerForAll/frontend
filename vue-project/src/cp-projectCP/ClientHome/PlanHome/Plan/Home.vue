@@ -6,7 +6,7 @@
       <a-tabs v-model:activeKey="activeKey" hide-add type="editable-card" @edit="onEdit">
         <a-tab-pane v-for="pane in panes" :key="pane.key" :tab="pane.title" :closable="pane.closable">
           <!-- {{ pane.content }} -->
-          {{clientStore.currentSelectObjID}}
+          {{clientStore.selectID}}
         </a-tab-pane>
       </a-tabs>
     </div>

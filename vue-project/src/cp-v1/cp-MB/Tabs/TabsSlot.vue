@@ -64,13 +64,9 @@ const handleChange = (key: string) => {
 </script>
 <template>
     <a-tabs v-model:activeKey="activeKey" type="card" @change="handleChange">
-      <a-tab-pane key="1" tab="客户(来访-未签约)">
+      <a-tab-pane key="1" tab="客户(待开发客户)">
         <div v-if="loadedTabs.includes('1')">
          
-          <slot name="1-header">
-            1
-          </slot>
-          <hr>
           <!-- container -->
           <slot name="1-container">
             2
@@ -81,7 +77,7 @@ const handleChange = (key: string) => {
         1.每期费用提前一个月 提醒租户 缴纳该期租金 <br>
         2.日常消费安全提醒
       </a-tab-pane> -->
-      <a-tab-pane key="2" tab="客户(已入驻-日常维护)">
+      <a-tab-pane key="2" tab="客户(近期关注客户)">
         <div v-if="loadedTabs.includes('2')">
           <slot name="2-container">
             2-1
@@ -104,7 +100,7 @@ const handleChange = (key: string) => {
         2.租金退还情况掌握<br>
         3.商铺场地清场情况掌握
       </a-tab-pane> -->
-      <a-tab-pane key="3" tab="客户(法务状态中)">
+      <a-tab-pane key="3" tab="客户(预计签合同)">
         <div v-if="loadedTabs.includes('3')">
           <slot name="3-container">
             3-1
@@ -116,7 +112,7 @@ const handleChange = (key: string) => {
         </div>
       </a-tab-pane>
   
-      <a-tab-pane key="4" tab="已归档的客户(合同完结)">
+      <a-tab-pane key="4" tab="客户(近期已签)">
         <div v-if="loadedTabs.includes('4')">
           <slot name="4-container">
             4-1

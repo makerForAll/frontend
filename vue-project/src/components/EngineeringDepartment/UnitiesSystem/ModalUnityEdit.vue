@@ -112,7 +112,7 @@
 <script lang="ts">
 import { PropType, defineComponent, reactive, ref, watchEffect } from 'vue';
 import { FormInstance, message } from 'ant-design-vue';
-import request from '../../../utils/request';
+import request from '../../../api/custom/custom-request';
 import { UnityType, UnityRegion, UnityStatus } from '../../../types';
 
 export default defineComponent({

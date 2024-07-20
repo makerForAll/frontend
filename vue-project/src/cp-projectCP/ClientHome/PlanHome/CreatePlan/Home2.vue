@@ -1,73 +1,223 @@
-
 <template>
-    <DrawerSlotView
+  <DrawerSlotView
     :action="'录入'"
     :entityType="'方案'"
-    :type="'create'"
-    v-model="planForm" 
-    :fields="planFields" 
-    :rules="rules" 
+    v-model="createState.item"
+    :fields="planFields"
+    :rules="rules"
     @handleSubmit="handleSubmit"
-    >
-
-    </DrawerSlotView>
+    @fieldChange="fieldChange"
+    @showDrawer="showDrawer"
+  >
+  </DrawerSlotView>
 </template>
 
 <script setup lang="ts">
-import { initPlanForm } from '@/api/plan';
-import DrawerSlotView from '@/cp-v1/cp-GCP/Drawer/DrawerSlot3.vue'
-import { usePlanStore } from '@/stores/plan';
-import type { Rule } from 'ant-design-vue/es/form';
-import { reactive } from 'vue';
 
-const planForm = reactive({...initPlanForm})
+import type { Plan } from '@/api/services/plan';
+import DrawerSlotView from '@/cp-v1/cp-GCP/Drawer/DrawerSlot4.vue'
+import { usePlanStore } from '@/stores/plan'
+import type { Rule } from 'ant-design-vue/es/form'
+import { ref } from 'vue';
+// import {reactive } from 'vue';
+
+// let planForm = reactive({...initPlanForm})
+
+// 监听 first_area、second_area 和 third_area 的变化
+// watch([() => planForm.first_area, () => planForm.second_area, () => planForm.third_area], () => {
+//   console.log("total:");
+//     computeTotalArea();
+// });
+
+// watch(totalArea, (newValue) => {
+//     planForm.total_area = newValue.toString();
+// });
+
+// --- 匹配业务需求 计算几个变量名，然后复制给另外一个变量名
+// const computeTotalArea = () => {
+//     const area1 = parseFloat(planForm.first_area) || 0;
+//     const area2 = parseFloat(planForm.second_area) || 0;
+//     const area3 = parseFloat(planForm.third_area) || 0;
+//     const total = area1 + area2 + area3;
+//     planForm.total_area = total.toString();
+//     // return area1 + area2 + area3;
+// };
 
 const planFields = [
-  { name: 'name', label: '方案名称', component: 'a-input', props: { placeholder: 'Enter name' } ,span:8},
-  { name: 'contract_type', label: '合同类型', component: 'a-select', 
-    props: { 
-      placeholder: 'Select contract type', 
+  {
+    name: 'name',
+    label: '方案名称',
+    component: 'a-input',
+    props: { placeholder: 'Enter name' },
+    span: 8
+  },
+  {
+    name: 'contract_type',
+    label: '合同类型',
+    component: 'a-select',
+    props: {
+      placeholder: 'Select contract type',
       options: [
-      { value: '租赁合同', label: '租赁合同' },
-      { value: '销售合同', label: '销售合同' },
-      { value: '其他', label: '其他' }],}, 
-    span: 8 },
-    { name: 'contract_status', label: '合同状态', component: 'a-select', 
-    props: { 
-      options: [
-      { value: '起草', label: '起草' },
-      { value: '正常履行', label: '正常履行' },
-      { value: '其他', label: '其他' }
-      ] },
-    span:8
+        { value: '租赁合同', label: '租赁合同' },
+        { value: '销售合同', label: '销售合同' },
+        { value: '其他', label: '其他' }
+      ]
     },
-  { name: 'first_name', label: '位置1', component: 'a-input', props: { placeholder: 'Enter first name' },span:8 },
-  { name: 'first_area', label: '面积1', component: 'a-input', props: { placeholder: 'Enter first area' } ,span:8 },
-  { name: 'first_price', label: '价格1', component: 'a-input', props: { placeholder: 'Enter first price' } ,span:8 },
-  { name: 'second_name', label: '位置2', component: 'a-input', props: { placeholder: 'Enter second name' } ,span:8 },
-  { name: 'second_area', label: '面积2', component: 'a-input', props: { placeholder: 'Enter second area' } ,span:8 },
-  { name: 'second_price', label: '价格2', component: 'a-input', props: { placeholder: 'Enter second price' } ,span:8 },
-  { name: 'third_name', label: '位置3', component: 'a-input', props: { placeholder: 'Enter third name' } ,span:8 },
-  { name: 'third_area', label: '面积3', component: 'a-input', props: { placeholder: 'Enter third area' } ,span:8 },
-  { name: 'third_price', label: '价格3', component: 'a-input', props: { placeholder: 'Enter third price' } ,span:8 },
-  { name: 'total_area', label: '合计面积', component: 'a-input', props: { placeholder: 'Enter total area' ,disabled:true},span:8  },
-  { name: 'average_price', label: '平均价格', component: 'a-input', props: { placeholder: 'Enter average price' ,disabled:true} ,span:8 },
-  { name: 'initial_monthly_price', label: '初期每月费用', component: 'a-input', props: { placeholder: 'Enter initial monthly price' ,disabled:true},span:8  },
-
-{ name: 'is_default', label: '是否默认', component: 'a-switch', props: { disabled:true} },
+    span: 8
+  },
+  {
+    name: 'contract_status',
+    label: '合同状态',
+    component: 'a-select',
+    props: {
+      options: [
+        { value: '起草', label: '起草' },
+        { value: '正常履行', label: '正常履行' },
+        { value: '其他', label: '其他' }
+      ]
+    },
+    span: 8
+  },
+  {
+    name: 'first_name',
+    label: '位置1',
+    component: 'a-input',
+    props: { placeholder: 'Enter first name' },
+    span: 8
+  },
+  {
+    name: 'first_area',
+    label: '面积1',
+    component: 'a-input-number',
+    props: { placeholder: 'Enter first area',addonAfter:"㎡" },
+    span: 8
+  },
+  {
+    name: 'first_price',
+    label: '价格1',
+    component: 'a-input-number',
+    props: { placeholder: 'Enter first price' ,addonAfter:"¥" },
+    span: 8
+  },
+  {
+    name: 'second_name',
+    label: '位置2',
+    component: 'a-input',
+    props: { placeholder: 'Enter second name' },
+    span: 8
+  },
+  {
+    name: 'second_area',
+    label: '面积2',
+    component: 'a-input-number',
+    props: { placeholder: 'Enter second area' ,addonAfter:"㎡"},
+    span: 8
+  },
+  {
+    name: 'second_price',
+    label: '价格2',
+    component: 'a-input-number',
+    props: { placeholder: 'Enter second price',addonAfter:"¥"  },
+    span: 8
+  },
+  {
+    name: 'third_name',
+    label: '位置3',
+    component: 'a-input',
+    props: { placeholder: 'Enter third name' },
+    span: 8
+  },
+  {
+    name: 'third_area',
+    label: '面积3',
+    component: 'a-input-number',
+    props: { placeholder: 'Enter third area', addonAfter:"㎡"},
+    span: 8
+  },
+  {
+    name: 'third_price',
+    label: '价格3',
+    component: 'a-input-number',
+    props: { placeholder: 'Enter third price' ,addonAfter:"¥" },
+    span: 8
+  },
+ 
+  {
+    name: 'is_default',
+    label: '是否默认',
+    component: 'a-switch',
+    props: { disabled: true },
+    span: 8
+  },
+  {
+    name: 'total_area',
+    label: '合计面积',
+    component: 'a-input-number',
+    props: { placeholder: 'Enter total area', disabled: true ,addonAfter:"㎡"},
+    span: 8
+  },
+  {
+    name: 'average_price',
+    label: '平均价格',
+    component: 'a-input-number',
+    props: { placeholder: 'Enter average price', disabled: true ,addonAfter:"¥"},
+    span: 8
+  },
+ 
   // { name: 'record_type', label: '是否默认', component: 'a-input', props: { placeholder: 'Enter record type' } },
   // { name: 'contract_duration_months', label: 'Contract Duration (Months)', component: 'a-input', props: { placeholder: 'Enter contract duration (months)' } },
-  // { name: 'start_date', label: 'Start Date', component: 'a-date-picker', props: { placeholder: 'Select start date' } },
-  // { name: 'payment_interval_months', label: 'Payment Interval (Months)', component: 'a-input', props: { placeholder: 'Enter payment interval (months)' } },
-  // { name: 'increase_interval_months', label: 'Increase Interval (Months)', component: 'a-input', props: { placeholder: 'Enter increase interval (months)' } },
-  // { name: 'increase_rate', label: 'Increase Rate (%)', component: 'a-input', props: { placeholder: 'Enter increase rate (%)' } },
-  // { name: 'deposit', label: 'Deposit (元)', component: 'a-input', props: { placeholder: 'Enter deposit (元)' } },
-  // { name: 'rent_free_months', label: 'Rent Free (Months)', component: 'a-input', props: { placeholder: 'Enter rent free (months)' } },
-  // { name: 'initial_payment_duedays', label: 'Initial Payment Due Days', component: 'a-input', props: { placeholder: 'Enter initial payment due days' } },
-  // { name: 'recurring_payment_duedays', label: 'Recurring Payment Due Days', component: 'a-input', props: { placeholder: 'Enter recurring payment due days' } },
-  // { name: 'total_amount', label: 'Total Amount', component: 'a-input', props: { placeholder: 'Enter total amount' } },
-  // { name: 'remarks', label: 'Remarks', component: 'a-input', props: { placeholder: 'Enter remarks' } },
-];
+  {
+    name: 'startdate_and_enddate',
+    label: '合同生效日期',
+    component: 'a-range-picker',
+    props: { placeholder: 'Select start date' },
+    span: 16
+  },
+  {
+    name: 'initial_monthly_price',
+    label: '初期每月费用',
+    component: 'a-input-number',
+    props: { placeholder: 'Enter initial monthly price', disabled: true ,addonAfter:"¥"},
+    span: 8
+  },
+  
+  {
+    name: 'increase_interval_months',
+    label: '增长率条件（每多少个月）',
+    component: 'a-select',
+    props: {
+      options: [
+        { value: '12', label: '每12个月' },
+        { value: '24', label: '每24个月' },
+        { value: '36', label: '每36个月' }
+      ]
+    },
+    span: 8
+  },
+  { name: 'increase_rate', label: '增长率（百分比）', component: 'a-input-number', props: { placeholder: '6', addonAfter:"%" },span: 8 },
+  { name: 'deposit', label: '押金', component: 'a-input-number', props: { placeholder: '500' ,addonAfter:"¥"} ,span: 8 },
+  
+  {
+    name: 'payment_interval_months',
+    label: '付款周期(每多少个月支付)',
+    component: 'a-select',
+    props: {
+      options: [
+        { value: '3', label: '每3个月' },
+        { value: '6', label: '每6个月' },
+        { value: '12', label: '每12个月' }
+      ]
+    },
+    span: 8
+  },
+  
+  { name: 'rent_free_months', label: 'JM', component: 'a-input-number', props: { placeholder: 'Enter rent free (months)' , addonAfter:"月"} ,span: 8},
+  // { name: 'total_amount', label: 'Total Amount', component: 'a-input-number', props: { placeholder: 'Enter total amount' ,addonAfter:"¥", disabled: true} ,span: 8},
+  // { name: 'initial_payment_duedays', label: '首期费用缴纳截止?', component: 'a-input-number', props: { placeholder: 'Enter initial payment due days', addonBefore:"第",addonAfter:"天", disabled: true} ,span: 8},
+  // { name: 'recurring_payment_duedays', label: '每期支付提前多久?', component: 'a-input-number', props: { placeholder: 'Enter recurring payment due days', addonAfter:"个月", disabled: true} ,span: 8},
+  
+  { name: 'remarks', label: '备注信息', component: 'a-input', props: { placeholder: 'Enter remarks' } },
+]
 
 const rules: Record<string, Rule[]> = {
   name: [{ required: true, message: 'Please enter name' }],
@@ -88,7 +238,7 @@ const rules: Record<string, Rule[]> = {
   is_default: [{ required: true, message: 'Please enter record type' }],
   // record_type: [{ required: true, message: 'Please enter record type' }],
   // contract_duration_months: [{ required: true, message: 'Please enter contract duration (months)' }],
-  // start_date: [{ required: true, message: 'Please select start date' }],
+  startdate_and_enddate: [{ required: false, message: 'Please select start date' }],
   // payment_interval_months: [{ required: true, message: 'Please enter payment interval (months)' }],
   // increase_interval_months: [{ required: true, message: 'Please enter increase interval (months)' }],
   // increase_rate: [{ required: true, message: 'Please enter increase rate (%)' }],
@@ -98,15 +248,84 @@ const rules: Record<string, Rule[]> = {
   // recurring_payment_duedays: [{ required: true, message: 'Please enter recurring payment due days' }],
   // total_amount: [{ required: true, message: 'Please enter total amount' }],
   // remarks: [{ required: false, message: 'Please enter remarks' }]
-};
-
-const planStore = usePlanStore();
-const handleSubmit = async (form: any) =>{
- await planStore.create(form);
 }
 
+// -------------------------------------  pinia层 数据交互 -------------------------------------------------------------------
+const { initCreateState, create, runCal, createState } = usePlanStore()
+
+const showDrawer = async () => {
+  // 重置form
+  await initCreateState()
+}
+
+const handleSubmit = async (form: any) => {
+  // 获取的创建填入的数据，并使用pinia的方法来进行创建数据模型
+  console.log("form数据:",form);
+  await create(form)
+}
+
+// const computeTotalArea = () => {
+//     const area1 = parseFloat(planForm.first_area) || 0;
+//     const area2 = parseFloat(planForm.second_area) || 0;
+//     const area3 = parseFloat(planForm.third_area) || 0;
+//     const total = area1 + area2 + area3;
+//     planForm.total_area = total.toFixed(2).toString(); // 格式化为2位小数并转换为字符串
+//     console.log("total:",planForm.total_area);
+
+// };
+// 识别 -------------------------------------------------------
+// const previousValues = ref({
+//   first_area: 0,
+//   second_area: 0,
+//   third_area: 0,
+//   first_price: 0,
+//   second_price: 0,
+//   third_price: 0,
+// });
+
+const fieldChange = async (form: Plan) => {
+//   // 使用解构赋值并提供默认值
+//   const {
+//     first_area = 0,
+//     second_area = 0,
+//     third_area = 0,
+//     first_price = 0,
+//     second_price = 0,
+//     third_price = 0
+//   } = form;
+
+//   // 获取之前的值
+//   const prev = previousValues.value;
+
+//   // 检查是否有任何一个属性值发生变化
+//   const hasChanged = (
+//     first_area !== prev.first_area ||
+//     second_area !== prev.second_area ||
+//     third_area !== prev.third_area ||
+//     first_price !== prev.first_price ||
+//     second_price !== prev.second_price ||
+//     third_price !== prev.third_price
+//   );
+
+//   if (hasChanged) {
+//     // 如果有变化，执行 runCal
+    runCal();
+
+//     // 更新 previousValues
+//     previousValues.value = {
+//       first_area,
+//       second_area,
+//       third_area,
+//       first_price,
+//       second_price,
+//       third_price,
+//     };
+//   }
+
+  createState.item = form
+  // computeTotalArea();
+}
+// -------------------------------------  pinia层 数据交互 -------------------------------------------------------------------
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

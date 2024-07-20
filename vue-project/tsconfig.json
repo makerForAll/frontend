@@ -9,9 +9,14 @@
     }
   ],
   "compilerOptions": {
+    "lib": ["ES6", "ES2017","dom"], // openapi-typescript-codegen  支持axios需要的配置
+    "allowSyntheticDefaultImports": true, // openapi-typescript-codegen 支持axios需要的配置
     "paths": {
       "@": ["./src"],
       "@/*": ["./src/*"] // TS文件中 实现 @路径别名 ，就多加个这个
-    }
+    },
+    // dayjs里的配置要求
+    "esModuleInterop": true,
+    // "allowSyntheticDefaultImports": true,
   }
 }

@@ -1,8 +1,10 @@
-import axios from '@/utils/request';
+// import axios from '@/api/request';
+import {PlanService,CreatePlanDTO,UpdateClientDTO} from '@/api'
+
 import { defineStore } from 'pinia';
 import { message } from 'ant-design-vue';
 
-import { type FrontEndPartyType ,  readPartyAPI, updatePartyAPI,deletePartyAPI,createPartyAPI, type Party } from '@/api/party';
+// import { type FrontEndPartyType ,  readPartyAPI, updatePartyAPI,deletePartyAPI,createPartyAPI, type Party } from '@/api/services/party';
 // const updateLocaPiniaState = () =>{
 //   const getState = usePartyStore
 //    //使用 更新数据 中 的ID，来寻找 状态数据中的 party的id对比，找到它在 party 数组里的index值。 
@@ -16,7 +18,24 @@ import { type FrontEndPartyType ,  readPartyAPI, updatePartyAPI,deletePartyAPI,c
 export const usePartyStore = defineStore('party', {
   // 其他配置...
   state: () => ({ 
-    readPartyStateData: {} as FrontEndPartyType,
+    createState:{// 要上传的表单数据
+      item:initPlanForm as unknown as Plan,
+      item2:initPlanForm as CreatePlanDTO
+    },
+    deleteState:{
+      selectID: '', // 要删除的ID
+    },
+    readState:{
+      items:[] as Plan[],
+      selectID: '' as string|undefined, // 要更新的对象
+      // formatItems: [] as any[],
+      total: 0 as number|undefined,
+    },
+    updateState:{  // create , update 都可以使用的 form 变量容器
+      item: {} as Plan, // 保存最新数据
+      selectID: '' as string|undefined, // 要更新的对象
+    },
+    loading:false
   }),  // store 的数据 (data)
 
   getters: {  // store 的计算属性 (computed)

@@ -18,7 +18,7 @@ import { ref, onMounted } from 'vue';
 import TableSlotView from '@/cp-v1/cp-GCP/Table/TableSlot2.vue';
 // import DrawerView from '@/components/BusinessDepartment/client/Tabs/ReadClient/Drawer/Home.vue';
 // import PopconfirmView from '@/components/PopconfirmView.vue';
-import { clientColumns, clientColumnsArr, type FrontEndClientType } from '@/api/client';
+// import { clientColumns, clientColumnsArr, type FrontEndClientType } from '@/api/services/client';
 import { useClientStore } from '@/stores/client';
 
 const clientStore = useClientStore();
@@ -38,10 +38,10 @@ const handleUpdate = async (id: string, data: FrontEndClientType) => {
   await clientStore.update(id, data);
 };
 
-const showDrawerView = (id: string) => {
-  if (drawerref.value) {
-    clientStore.currentSelectObjID = id;
-    drawerref.value.showDrawer();
-  }
-};
+// const showDrawerView = (id: string) => {
+//   if (drawerref.value) {
+//     clientStore.selectID = id;
+//     drawerref.value.showDrawer();
+//   }
+// };
 </script>

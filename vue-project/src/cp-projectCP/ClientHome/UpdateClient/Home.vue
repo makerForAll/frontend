@@ -15,7 +15,6 @@
   // import UpdateEntityDrawer from './UpdateEntityDrawer.vue';
   import DrawerSlot from '@/cp-v1/cp-GCP/Drawer/DrawerSlot.vue';
   import type { Rule } from 'ant-design-vue/es/form';
-//   import { fetchClientById, updateClient } from '@/api/client';
 import { useClientStore } from '@/stores/client';
   
   const clientForm = reactive({

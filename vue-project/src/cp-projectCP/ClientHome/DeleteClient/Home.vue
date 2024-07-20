@@ -2,7 +2,6 @@
     <ButtonSlotView 
     :Confirm="handleConfirm"
     >
-
     </ButtonSlotView>
 </template>
 
@@ -13,12 +12,12 @@ import message from 'ant-design-vue/es/message';
 
   const clientStore = useClientStore();
 
-
-
   const handleConfirm = async (password: string) => {
   if (password === '8888') {
-    await clientStore.delete(clientStore.currentSelectObjID as string);
-    await clientStore.read();
+    console.log("myId:",clientStore.clientData.selectID);
+    
+    await clientStore.delete(clientStore.clientData.selectID as string);
+    // await clientStore.read();
   } else {
     await message.error('密码错误，删除失败');
   }

@@ -20,11 +20,11 @@
  <script setup lang="ts">
  import { reactive, ref, toRaw} from 'vue';
  import { type FormInstance, message } from 'ant-design-vue';  
- import request from '@/utils/request' // 请求
+ import request from '@/api/request' // 请求
  
 //  import type { PartyType } from '@/types'; // 类型
 //  import type { PartyType } from '@/types'; // 类型
-import { createPartyAPI, type FrontEndPartyType } from '@/api/party'; 
+import { createPartyAPI, type FrontEndPartyType } from '@/api/services/party'; 
 import { usePartyStore } from '@/stores/party'
 
  // 定义响应式变量和引用

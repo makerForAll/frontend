@@ -32,7 +32,7 @@
   </a-table>
 </template>
 <script lang="ts" setup>
-import axios from '@/utils/request';
+import axios from '@/api/request';
 import { cloneDeep } from 'lodash-es';
 import { onMounted, reactive, ref } from 'vue';
 import type { UnwrapRef } from 'vue';

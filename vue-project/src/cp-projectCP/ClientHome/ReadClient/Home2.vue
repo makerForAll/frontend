@@ -1,37 +1,40 @@
 <template>
-        <TableSlotView 
+       <TableSlotView 
         :handleMouseOver="handleMouseOver"
         :handleMouseLeave="handleMouseLeave"
         :queryData = "queryData"
         :clientStore="clientStore"
         >
-        <template #operations>
+       <template #operations>
           <slot name="operations-chlid"></slot>
       </template>
-        </TableSlotView>
+        </TableSlotView> 
 </template>
 
 <script setup lang="ts">
-import type { APIParams } from '@/api/client';
-import TableSlotView from '@/cp-v1/cp-GCP/Table/TableSlot2.vue'
+// 提供1个插槽
 
-import { useClientStore } from '@/stores/client';
-const clientStore = useClientStore();
 
-const handleMouseOver = async (event:MouseEvent,id:string) =>{
-  console.log('Hovered over row with ID:', id);
-  // 需要优化
-  clientStore.currentSelectObjID = id;
-}
+// import TableSlotView from '@/cp-v1/cp-ReadMB-data/Table/TableSlot2.vue'
 
-const handleMouseLeave = () => {
-  console.log('Mouse left the row');
-};
+// import { useClientStore } from '@/stores/client';
+// const clientStore = useClientStore();
 
-const queryData = async (params: APIParams):Promise<void> => {
-  // 需要优化
-  await clientStore.read(params);
-};
+// const handleMouseOver = async (event:MouseEvent,id:string) =>{
+//   console.log('Hovered over row with ID:', id);
+//   // 需要优化
+//   clientStore.updateState.selectID = id;
+//   clientStore.deleteState.selectID = id;
+// }
+
+// const handleMouseLeave = () => {
+//   console.log('Mouse left the row');
+// };
+
+// const queryData = async (params: APIParams):Promise<void> => {
+//   // 需要优化
+//   await clientStore.read(params);
+// };
 
 </script>
 

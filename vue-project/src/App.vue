@@ -1,4 +1,5 @@
 <template>
+   <a-config-provider :locale="zhCN">
   <a-layout>
   <RouterView /> <!-- 默认 -->
    <a-layout>
@@ -10,9 +11,12 @@
            </a-layout>
    </a-layout>
  </a-layout>
+</a-config-provider>
 </template>
 <script setup lang="ts">
-
+// 组件中文化
+import enUS from 'ant-design-vue/es/locale/en_US';
+import zhCN from 'ant-design-vue/es/locale/zh_CN';
 </script>
 <style>
 .layout {

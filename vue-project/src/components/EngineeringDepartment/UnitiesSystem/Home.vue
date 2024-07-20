@@ -111,7 +111,7 @@
 import { TablePaginationConfig, TableProps, message } from 'ant-design-vue';
 import { usePagination } from 'vue-request';
 import { computed, defineComponent, reactive, ref, toRefs, watch } from 'vue';
-import request from '../../../utils/request';
+import request from '../../../api/custom/custom-request';
 import {
     APIResultForUnityType,
     APIParams,
