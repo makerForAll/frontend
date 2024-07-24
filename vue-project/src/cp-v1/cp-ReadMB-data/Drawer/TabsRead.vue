@@ -20,7 +20,7 @@
         @edit="onEdit"
       >
         <a-tab-pane
-          v-for="pane in planStore.readState.formatItems"
+          v-for="pane in planStore.data.items"
           :key="pane.key"
           :tab="pane.title"
           :closable="pane.closable"
@@ -59,8 +59,8 @@ const planStore = usePlanStore()
 
 const tabClick = async (id: any) => {
   console.log('zujian:', id)
-  planStore.updateState.selectID = id
-  planStore.deleteState.selectID = id
+  planStore.data.selectID = id
+  planStore.data.selectID = id
 }
 // ----------------------------------------
 

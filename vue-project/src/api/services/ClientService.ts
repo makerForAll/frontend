@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { ClientBackEndDTO } from '../models/ClientBackEndDTO';
+import type { ClientDTO } from '../models/ClientDTO';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class ClientService {
@@ -65,7 +65,7 @@ export class ClientService {
     public clientControllerCreate({
         requestBody,
     }: {
-        requestBody: ClientBackEndDTO,
+        requestBody: ClientDTO,
     }): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'POST',
@@ -102,7 +102,7 @@ export class ClientService {
         requestBody,
     }: {
         id: string,
-        requestBody: ClientBackEndDTO,
+        requestBody: ClientDTO,
     }): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'PUT',

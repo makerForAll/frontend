@@ -18,6 +18,7 @@
                                           <CreatePlanView></CreatePlanView>
                                      </template> 
                                      <template #operations>
+                                          <UpdatePlanView></UpdatePlanView>
                                           <DeletePlanView></DeletePlanView>
                                     </template>
                                      </ReadPlanView>
@@ -59,6 +60,7 @@ import ReadPlanView from '@/cp-projectCP/PlanHome/ReadPlan/Home.vue';
 
 // cp-projectCP 配置你要的 配件
 import CreatePlanView from '@/cp-projectCP/PlanHome/CreatePlan/Home2.vue';
+import UpdatePlanView from '@/cp-projectCP/PlanHome/UpdatePlan/Home.vue';
 // import ReadPlanView from '@/cp-projectCP/ClientHome/PlanHome/ReadPlan/Home3.vue';
 import DeletePlanView from '@/cp-projectCP/PlanHome/DeletePlan/Home.vue';
 // import dateView from '@/cp-v1/cp-GCP/Drawer/date.vue'

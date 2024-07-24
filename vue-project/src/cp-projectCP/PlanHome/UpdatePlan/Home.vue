@@ -1,6 +1,6 @@
 <template>
   <DrawerSlotView
-    :action="'录入'"
+    :action="'修改'"
     :entityType="'方案'"
     v-model="planStore.data.item"
     :fields="planFields"
@@ -21,7 +21,8 @@ import { usePlanStore } from '@/stores/plan'
 import type { Rule } from 'ant-design-vue/es/form'
 import { ref } from 'vue';
 import type {Field} from '@/cp-v1/cp-GCP/Drawer/DrawerSlot4.vue';
-import type { PlanBackEndDTO } from '@/api';
+import type { PlanDTO } from '@/api';
+import { generatePaymentDetails } from '../tool/calPayment';
 
 // import {reactive } from 'vue';
 
@@ -46,6 +47,7 @@ import type { PlanBackEndDTO } from '@/api';
 //     planForm.total_area = total.toString();
 //     // return area1 + area2 + area3;
 // };
+
 
 const planFields:Field[] = [
 {
@@ -174,7 +176,7 @@ const planFields:Field[] = [
     label: '合同生效日期',
     component: 'a-range-picker',
     props: { placeholder: 'Select start date' },
-    span: 16
+    span: 24
   }, 
   {
     name: 'contract_duration_days',
@@ -223,9 +225,15 @@ const planFields:Field[] = [
   { name: 'rent_free_months', label: 'JM', component: 'a-input-number', props: { placeholder: 'Enter rent free (months)' , addonAfter:"月"} ,span: 8},
   { name: 'remarks', label: '备注信息', component: 'a-input', props: { placeholder: 'Enter remarks'} },
   { name: '支付明细', component: 'hr', props: { placeholder: 'Enter remarks'} },
-  { name: '支付明细', component: 'hr', props: { placeholder: 'Enter remarks'} },
+  // { name: '支付明细', component: 'hr', props: { placeholder: 'Enter remarks'} },
+  // {
+  //   name: 'first_price',
+  //   label: '价格1',
+  //   component: 'a-input-number',
+  //   props: { placeholder: 'Enter first price' ,addonAfter:"¥" },
+  //   span: 8
+  // },
 ]
-
 
 
 
@@ -250,7 +258,7 @@ const rules: Record<string, Rule[]> = {
   is_default: [{ required: true, message: 'Please enter record type' }],
   // record_type: [{ required: true, message: 'Please enter record type' }],
   // contract_duration_months: [{ required: true, message: 'Please enter contract duration (months)' }],
-  startdate_and_enddate: [{ required: false, message: 'Please select start date' }],
+  // startdate_and_enddate: [{ required: false, message: 'Please select start date' }],
   // payment_interval_months: [{ required: true, message: 'Please enter payment interval (months)' }],
   // increase_interval_months: [{ required: true, message: 'Please enter increase interval (months)' }],
   // increase_rate: [{ required: true, message: 'Please enter increase rate (%)' }],
@@ -269,15 +277,27 @@ const planStore = usePlanStore()
 
 const showDrawer = async () => {
   // 重置form
-  await planStore.initState()
+  // await planStore.initState()
   // planStore.data.item.client = planStore.data.selectID;
+  // 打开指定ID的plan在pinia中的数据
+await planStore.readById(planStore.data.selectID);
+ 
+  // ---------------------------------------------
+  // 没必要重新读取，应该直接从 ReadPlan 中获取！！然后存入 plan的 item中
+  // const index = planStore.data.items.findIndex((item:PlanBackEndDTO)=> item.id === planStore.data.selectID);
+  // if (index !== -1) { // 说明该找到了，有这个值。
+  //   // 更新好的数据 response.data 来 赋值给 this.party[index],（更新了本地的状态数据）
+  //   // planStore.data.items[index] = item;
+  //   planStore.data.item = planStore.data.items[index];
+  // }
 }
 
 const handleSubmit = async (form: any) => {
   // 获取的创建填入的数据，并使用pinia的方法来进行创建数据模型
   console.log("form数据:",form);
   // 创建plan 时，关联 指定ID的Client
-  await planStore.create(clientState.data.selectID as string,form);
+  await planStore.update(planStore.data.selectID,form);
+  // await planStore.create(clientState.data.selectID as string,form);
 }
 
 // const computeTotalArea = () => {
@@ -299,7 +319,7 @@ const handleSubmit = async (form: any) => {
 //   third_price: 0,
 // });
 
-const fieldChange = async (form: PlanBackEndDTO) => {
+const fieldChange = async (form: PlanDTO) => {
 // 【响应式】检查 payment 中的 对象结构，如果有匹配的内容，就把 对应的 表单匹配信息 加入 planFields 中
 // payment中指 create payment时，几个关键的字段在修改数据时，会触发pinia层的计算，得出1个 payment的对象结构。
   // 思考
@@ -308,6 +328,8 @@ const fieldChange = async (form: PlanBackEndDTO) => {
 
 // ---------------------------------------------------------
 // 先看是否符合 计算 支付明细 的 条件
+const payment = generatePaymentDetails(form);
+console.log("form---------------:",payment);
 console.log("form---------------:",form);
 
   // 如果支持，就开始进行计算，根据计算结果，用得到的 json格式 来 修改 pinia层 planStore.data.item  中的 payment对象。

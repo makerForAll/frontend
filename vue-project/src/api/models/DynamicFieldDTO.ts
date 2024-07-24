@@ -6,14 +6,14 @@ export type DynamicFieldDTO = {
     /**
      * 位置名称
      */
-    name: string;
+    name?: string;
     /**
      * 面积
      */
-    area: number;
+    area?: number;
     /**
      * 价格
      */
-    price: number;
+    price?: number;
 };
 

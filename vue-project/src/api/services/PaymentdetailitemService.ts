@@ -2,28 +2,17 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { PlanDTO } from '../models/PlanDTO';
+import type { PaymentDetailItemDTO } from '../models/PaymentDetailItemDTO';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
-export class PlanService {
+export class PaymentdetailitemService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
-    /**
-     * plan数据初始化
-     * @returns any
-     * @throws ApiError
-     */
-    public planControllerGetInit(): CancelablePromise<any> {
-        return this.httpRequest.request({
-            method: 'GET',
-            url: '/api/v1/plan/init',
-        });
-    }
     /**
      * 获取所有Plan
      * @returns any
      * @throws ApiError
      */
-    public planControllerFindAll({
+    public paymentdetailitemControllerFindAll({
         current = 1,
         pagesize = 10,
         sortField = 'name',
@@ -48,7 +37,7 @@ export class PlanService {
     }): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/v1/plan',
+            url: '/api/v1/paymentdetailitem',
             query: {
                 'current': current,
                 'pagesize': pagesize,
@@ -62,7 +51,7 @@ export class PlanService {
      * @returns any
      * @throws ApiError
      */
-    public planControllerFindByClientId({
+    public paymentdetailitemControllerFindByClientId({
         id,
         current = 1,
         pagesize = 10,
@@ -89,7 +78,7 @@ export class PlanService {
     }): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/v1/plan/client/{id}',
+            url: '/api/v1/paymentdetailitem/client/{id}',
             path: {
                 'id': id,
             },
@@ -106,14 +95,14 @@ export class PlanService {
      * @returns any
      * @throws ApiError
      */
-    public planControllerFindOne({
+    public paymentdetailitemControllerFindOne({
         id,
     }: {
         id: string,
     }): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/v1/plan/{id}',
+            url: '/api/v1/paymentdetailitem/{id}',
             path: {
                 'id': id,
             },
@@ -124,16 +113,16 @@ export class PlanService {
      * @returns any
      * @throws ApiError
      */
-    public planControllerUpdate({
+    public paymentdetailitemControllerUpdate({
         id,
         requestBody,
     }: {
         id: string,
-        requestBody: PlanDTO,
+        requestBody: PaymentDetailItemDTO,
     }): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'PUT',
-            url: '/api/v1/plan/{id}',
+            url: '/api/v1/paymentdetailitem/{id}',
             path: {
                 'id': id,
             },
@@ -146,14 +135,14 @@ export class PlanService {
      * @returns any
      * @throws ApiError
      */
-    public planControllerDelete({
+    public paymentdetailitemControllerDelete({
         id,
     }: {
         id: string,
     }): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'DELETE',
-            url: '/api/v1/plan/{id}',
+            url: '/api/v1/paymentdetailitem/{id}',
             path: {
                 'id': id,
             },
@@ -164,16 +153,16 @@ export class PlanService {
      * @returns any
      * @throws ApiError
      */
-    public planControllerCreate({
+    public paymentdetailitemControllerCreate({
         clientId,
         requestBody,
     }: {
         clientId: string,
-        requestBody: PlanDTO,
+        requestBody: PaymentDetailItemDTO,
     }): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/api/v1/plan/{clientId}',
+            url: '/api/v1/paymentdetailitem/{clientId}',
             path: {
                 'clientId': clientId,
             },

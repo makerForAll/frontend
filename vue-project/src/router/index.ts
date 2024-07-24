@@ -15,17 +15,17 @@ const router = createRouter({
 			// props:true,
 			meta: { requiredLogin: true },
 		},
-		{
-			path: '/party',
-			name: 'party',
-			components: {
-				default: () => import('@/layoutComponents/HearderBar.vue'),
-				SiderBar: () => import('@/layoutComponents/SiderBar.vue'),
-				MainContainer: () => import('@/components/Management/party/Home.vue')
-			},
-			// props:true,
-			meta: { requiredLogin: true },
-		},
+		// {
+		// 	path: '/party',
+		// 	name: 'party',
+		// 	components: {
+		// 		default: () => import('@/layoutComponents/HearderBar.vue'),
+		// 		SiderBar: () => import('@/layoutComponents/SiderBar.vue'),
+		// 		MainContainer: () => import('@/components/Management/party/Home.vue')
+		// 	},
+		// 	// props:true,
+		// 	meta: { requiredLogin: true },
+		// },
 		{
 			path: '/client',
 			name: 'client',

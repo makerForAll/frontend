@@ -3,13 +3,14 @@ import { defineStore } from 'pinia';
 import { message } from 'ant-design-vue';
 
 // import { type FrontEndPlanType ,readPlanAPI, createPlanAPI, updatePlanAPI ,deletePlanAPI, type Plan,type APIParams, readPlanIDAPI, findReadByClientId } from '@/api/services/plan';
-import type {ClientBackEndDTO ,PlanBackEndDTO} from '@/api'
-import dayjs from 'dayjs';
+import type {ClientDTO, PlanDTO} from '@/api'
+import dayjs, { Dayjs } from 'dayjs';
 // import testVIew from '@/cp-projectCP/ClientHome/PlanHome/ReadPlan/test.vue';
 // import { markRaw } from 'vue';
 
 import{ APIforBackEnd} from '@/api'
-import type{ ApiResponse,ApiResults} from '@/api/custom/models-common'
+import type{ ApiResponse,ApiResults} from '@/custom/api/models/models-common'
+import { toRaw } from 'vue';
 
 const api = new APIforBackEnd();
 
@@ -68,8 +69,8 @@ export const usePlanStore = defineStore('plan', {
   state: () => {
    return { 
     data: {
-      item:{} as PlanBackEndDTO,
-      items:[] as PlanBackEndDTO[],
+      item:{} as PlanDTO,
+      items:[] as PlanDTO[],
       total:0,
       selectID: '', // 要更新的对象
       loading:false  // store 的数据 (data)
@@ -79,41 +80,54 @@ export const usePlanStore = defineStore('plan', {
 
   getters: {  // store 的计算属性 (computed)
     calAreaAndPrice(): number[]{
-      const total_area = (this.data.item.first_area || 0) +
+      const total_area = Number(this.data.item.first_area || 0) + Number
       (this.data.item.second_area || 0) +
-      (this.data.item.third_area || 0);
+      Number(this.data.item.third_area || 0);
       const total_price = 
-      (this.data.item.first_price || 0)*(this.data.item.first_area || 0) +
-      (this.data.item.second_price || 0)* (this.data.item.second_area || 0) +
-      (this.data.item.third_price || 0)*(this.data.item.third_area || 0)
-      return [total_area,total_price/total_area,total_price];
+      Number(this.data.item.first_price || 0)*Number(this.data.item.first_area || 0) +
+      Number(this.data.item.second_price || 0)* Number(this.data.item.second_area || 0) +
+      Number(this.data.item.third_price || 0)*Number(this.data.item.third_area || 0)
+      return [this.calRound(total_area),this.calRound(total_price/total_area),this.calRound(total_price)];
     },
     totalCal:(state) =>{
       return (num:number) => {return num+1}
+    },
+    calRound(){
+      return (num:number) =>{
+        return Math.round(num * 100) / 100;
+      }
     }
   },
   actions: {
+    async changType(){
+      const item =  this.data.item as PlanDTO;
+      // console.log("changeType1:", item.startdate_and_enddate?.map((item:any) => dayjs(item)));
+      const changedData = item.startdate_and_enddate?.map((item:any) => dayjs(item))
+      // this.data.item = {...this.data.item,startdate_and_enddate:changedData};
+      // console.log("changeType2:", changedData[0]);
+        return changedData;
+      },
     async runCal(){
       this.data.item.total_area = this.calAreaAndPrice[0];
       this.data.item.average_price = this.calAreaAndPrice[1];
       this.data.item.initial_monthly_price = this.calAreaAndPrice[2]
     },
     // async initState(){
-    //   const response:ApiResponse<PlanBackEndDTO> = api.plan.planControllerGetInit() as any;
+    //   const response:ApiResponse<PlanDTO> = api.plan.planControllerGetInit() as any;
     //   this.data.item = response.results.data[0];
     // },
     async initState(){
-      const response:ApiResponse<PlanBackEndDTO> = await api.plan.planControllerGetInit();
+      const response:ApiResponse<PlanDTO> = await api.plan.planControllerGetInit();
       const results = response.results
       if (response && response.results) {
-        const item: PlanBackEndDTO = results.data[0];
+        const item: PlanDTO = results.data[0];
         this.data.item = item;
       }
       // this.data.item = myapi.plan.planControllerGetInit();
     },
     async create(clientId:string,requestBody:any){
       try{
-        const response:ApiResponse<PlanBackEndDTO> = await api.plan.planControllerCreate({clientId,requestBody})
+        const response:ApiResponse<PlanDTO> = await api.plan.planControllerCreate({clientId,requestBody})
         // await this.changeFormat();
         message.success("创建客户信息成功")
         // 更新本地 state 中的 party 数据 -------------------------------------------
@@ -134,8 +148,10 @@ export const usePlanStore = defineStore('plan', {
       pagesize: 10
      }) { // 异步编程获取数据
       try {
-        const response:ApiResponse<PlanBackEndDTO> = await api.plan.planControllerFindAll(params);
-        this.data.items = response.results.data;
+        const response:ApiResponse<PlanDTO> = await api.plan.planControllerFindAll(params);
+        const items = response.results.data
+        // this.data.item = {...item,startdate_and_enddate:this.changType()};
+        this.data.items = items;
         this.data.total = response.results.total as number;
         // this.readStateData = data;
         console.log("data:",response);
@@ -147,61 +163,69 @@ export const usePlanStore = defineStore('plan', {
         throw error;
       }
     },
-    async readById(id: string): Promise<PlanBackEndDTO> {
+
+    async readById(id: string): Promise<PlanDTO> {
       // this.loading = true;
       try {
-        const response:ApiResponse<PlanBackEndDTO> = await api.plan.planControllerFindOne({id})
-        const item = response.results.data[0]
-        this.data.item = item;
-        console.log("readById return data--------",item);
-        return item;
+        const response:ApiResponse<PlanDTO> = await api.plan.planControllerFindOne({id})
+        const responseItem = response.results.data[0]
+        // const getdata = this.changType(item.startdate_and_enddate);
+        // 匹配前端需求的数据格式
+        this.data.item = responseItem;
+        // console.log("readById return data---1-----",item);
+        // const getM2 = await this.changType();
+        // const item = {...responseItem,startdate_and_enddate:getM2};
+        // console.log("getM2:----------",getM2);
+        
+        // this.data.item = responseItem
+        return responseItem;
       } catch (error) {
         // this.error = error.message;
-        return {} as PlanBackEndDTO;
+        return {} as PlanDTO;
       } finally {
         // this.loading = false;
       }
     },    
-    async readByClientId(id: string): Promise<PlanBackEndDTO[]> {
-      // this.loading = true;
+    async readByClientId(id: string): Promise<PlanDTO[]> {
+      this.data.loading = true;
       try {
-        const response:ApiResponse<PlanBackEndDTO> = await api.plan.planControllerFindByClientId({id});
+        const response:ApiResponse<PlanDTO> = await api.plan.planControllerFindByClientId({id});
         this.data.items = response.results.data;
         this.data.total = response.results.total as number;
-        // console.log("readByClientId--------",data.results.data);
+        console.log("readByClientId--------",response.results.data);
         return response.results.data;
       } catch (error) {
         // this.error = error.message;
-        return [] as PlanBackEndDTO[];
+        return [] as PlanDTO[];
       } finally {
-        // this.loading = false;
+        this.data.loading = false;
       }
     },
     async update(id:string,requestBody: any) {
       try {
-        const response:ApiResponse<PlanBackEndDTO> = await api.plan.planControllerUpdate({id,requestBody});
+        const response:ApiResponse<PlanDTO> = await api.plan.planControllerUpdate({id,requestBody});
         const item = response.results.data[0];
         // const updateData = await this.readById(id);
        
-        const index = this.data.items.findIndex((item:PlanBackEndDTO)=> item.id === id);
+        const index = this.data.items.findIndex((item:PlanDTO)=> item.id === id);
         if (index !== -1) { // 说明该找到了，有这个值。
           // 更新好的数据 response.data 来 赋值给 this.party[index],（更新了本地的状态数据）
           this.data.items[index] = item;
         }
         message.success("更新成功!")
-      } catch (error) {
+      } catch (error:any) {
         message.error(`请求错误!:${error}`);
         console.error("Error updating data:", error);
-        throw error;
+        throw new Error('Error updating data: ' + (error?.response?.data?.message || 'Unknown error'));
       }
     },
 
     async delete(id: string) {
       try {
-        const response:ApiResponse<PlanBackEndDTO> = await api.plan.planControllerDelete({id});
+        const response:ApiResponse<PlanDTO> = await api.plan.planControllerDelete({id});
         // await deletePlanAPI(id);
         // 更新本地 state 中的 party 数据 -------------------------------------------
-        const index = this.data.items.findIndex((item:PlanBackEndDTO)=> item.id === id);
+        const index = this.data.items.findIndex((item:PlanDTO)=> item.id === id);
         if(index !== -1){
           this.data.items.splice(index,1);
           // console.log("index:",index);

@@ -7,14 +7,14 @@ import type { OpenAPIConfig } from './core/OpenAPI';
 import { AxiosHttpRequest } from './core/AxiosHttpRequest';
 import { ClientService } from './services/ClientService';
 import { PartyService } from './services/PartyService';
-import { PaymentdetailService } from './services/PaymentdetailService';
+import { PaymentdetailitemService } from './services/PaymentdetailitemService';
 import { PlanService } from './services/PlanService';
 import { UserService } from './services/UserService';
 type HttpRequestConstructor = new (config: OpenAPIConfig) => BaseHttpRequest;
 export class APIforBackEnd {
     public readonly client: ClientService;
     public readonly party: PartyService;
-    public readonly paymentdetail: PaymentdetailService;
+    public readonly paymentdetailitem: PaymentdetailitemService;
     public readonly plan: PlanService;
     public readonly user: UserService;
     public readonly request: BaseHttpRequest;
@@ -32,7 +32,7 @@ export class APIforBackEnd {
         });
         this.client = new ClientService(this.request);
         this.party = new PartyService(this.request);
-        this.paymentdetail = new PaymentdetailService(this.request);
+        this.paymentdetailitem = new PaymentdetailitemService(this.request);
         this.plan = new PlanService(this.request);
         this.user = new UserService(this.request);
     }

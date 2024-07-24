@@ -5,7 +5,8 @@
             <a-menu-item key="home">
                 <RouterLink :to="`/`">仪表盘</RouterLink>
             </a-menu-item>
-            <a-sub-menu key="sub1"> <!-- 管理层 --------------------------------------------------- -->
+            <!-- 管理层 --------------------------------------------------- -->
+            <!-- <a-sub-menu key="sub1"> 
                 <template #title>
                     <span>
                         管理层
@@ -14,11 +15,11 @@
                 <a-menu-item key="1-1">
                     <RouterLink :to="`/party`">甲方管理</RouterLink>
                 </a-menu-item>
-            </a-sub-menu>
+            </a-sub-menu> -->
             <a-sub-menu key="sub2"> <!-- 业务部 --------------------------------------------------- -->
                 <template #title>
                     <span>
-                        业务部
+                        客户相关
                     </span>
                 </template>
                 <a-menu-item key="2-1">
@@ -34,7 +35,7 @@
             <a-sub-menu key="sub3"> <!-- 财务部 --------------------------------------------------- -->
                 <template #title>
                     <span>
-                        财务部
+                        财务相关
                     </span>
                 </template>
                 <!-- <a-menu-item key="3-1">

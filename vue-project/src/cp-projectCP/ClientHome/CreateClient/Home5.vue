@@ -39,7 +39,7 @@ const clientFields:Field[] = [
   { name: 'emergencycontact', label: '紧急联系人', component: 'a-input', props: { placeholder: '请输入紧急联系人名称' } },
   { name: 'emergencycontactphone', label: '紧急联系人号码', component: 'a-input', props: { placeholder: '请输入紧急联系人号码' } },
   { name: 'marks', label: '备注', component: 'a-input', props: { placeholder: '请输入备注信息' }, },
-  { name: 'createdAt', label: '注册时间', component: 'a-date-picker', props: { placeholder: '请输入备注信息',disabled:true},},
+  // { name: 'createdAt', label: '注册时间', component: 'a-date-picker', props: { placeholder: '请输入备注信息',disabled:true},},
   // 其他字段可以按需添加
 ];
 
@@ -69,20 +69,16 @@ const handleSubmit = async (form: APIforBackEnd) =>{
   // console.log("form:-----------",form.createdAt.toISOString());
   // form.createdAt
  await clientStore.create(form);
-//  await clientData.; // 初始化表单
+
 }
 reactive
 
 const showDrawer = async() => { // 重置form
-  // clientStore.initStateItem();
-  // await clientStore.initCreateState();
-  // await clientStore.addTodayTime(clientStore.clientData.item);
+  await clientStore.initStateItem();;
 }
 
 const fieldChange = async (form:any) =>{
-  // console.log("form123:",form);
-  // clientStore.clientData.item = form;
-  // console.log("state:",clientStore.clientData.item);
+   clientStore.data.item = form;
 }
 
 

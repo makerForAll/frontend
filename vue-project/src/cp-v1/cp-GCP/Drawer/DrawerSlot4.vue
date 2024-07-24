@@ -18,7 +18,7 @@
       <a-row :gutter="24">
         <template v-for="(field) in fields" :key="`${field.name}`">
           <a-col :span="field.span || 24">
-            <a-form-item :label="field.label" :name="`${field.name}`" :for="`${field.name}`">
+            <a-form-item :label="field.label" :name="`${field.name}`" :for="`${field.name}`" :style="field?.props?.style">
                <!-- input 组件 -->
               <template v-if="field.component === 'a-input'">
                 <a-input :id="`form_item_${field.name}`" :name="`form_item_${field.name}`" @input="fieldChange" @change="fieldChange" v-model:value="internalForm[field.name]" v-bind="field.props" />
@@ -28,6 +28,7 @@
                 <a-input-number :id="`form_item_${field.name}`" :name="`form_item_${field.name}`"  @input="fieldChange" @change="fieldChange" v-model:value="internalForm[field.name]" v-bind="field.props"/>
                 <!-- <a-input-number id="inputNumber" v-model:value="value" :min="1" :max="10" /> -->
               </template>
+         
                  <!-- input 组件  动态 字段添加-->
                  <!-- <template v-else-if="field.component === 'a-input-dynamic'">
                 <a-input @input="fieldChange" @change="fieldChange" v-model:value="internalForm[field.name]" v-bind="field.props"/>
@@ -81,7 +82,19 @@
               <template v-else-if="field.component === 'a-select'">
                 <a-select :id="`form_item_${field.name}`" :name="`form_item_${field.name}`" v-model:value="internalForm[field.name]" v-bind="field.props">
                   <a-select-option
-                    v-for="option in field.props?.options"
+                    v-for="option in field.props?.options_str"
+                    :key="option.value"
+                    :value="option.value"
+                  >
+                    {{ option.label }}
+                  </a-select-option>
+                </a-select>
+              </template>
+
+              <template v-else-if="field.component === 'a-select-number'">
+                <a-select :id="`form_item_${field.name}`" :name="`form_item_${field.name}`" v-model:value="internalForm[field.name]" v-bind="field.props">
+                  <a-select-option
+                    v-for="option in field.props?.options_num"
                     :key="option.value"
                     :value="option.value"
                   >
@@ -94,17 +107,32 @@
               <template v-else-if="field.component === 'a-switch'">
                 <a-switch :id="`form_item_${field.name}`" :name="`form_item_${field.name}`"  v-model:checked="internalForm[field.name]" v-bind="field.props" />
               </template>
+
               <template v-else-if="field.component === 'a-range-picker'">
                
+               <a-space direction="vertical" :size="12">
+              
                 <a-range-picker :id="`form_item_${field.name}`" :name="`form_item_${field.name}`" v-model:value="internalForm[field.name]" :presets="rangePresets" @calendarChange="onRangeChange"/>
-                  <span>总天数：{{ totalDays }} 天</span>
+              </a-space>
+                
+                  <!-- <span>总天数：{{ totalDays }} 天</span> -->
               </template>
+
               <template v-else-if="field.component === 'a-date-picker'">
                 <a-date-picker :id="`form_item_${field.name}`" :name="`form_item_${field.name}`" v-model:value="internalForm[field.name]" v-bind="field.props" @change="getFun"/>
                   <!-- <p>总天数：{{ dayjs(internalForm[field.name]) }} 天</p> -->
                   <p>总天数：{{ internalForm[field.name]}}天</p>
               </template>
-              
+              <template v-else-if="field.component === 'forInput'">
+                <!-- <a-divider style="height: 10px;border-color: #7cb305" dashed>{{ field.name }}</a-divider> -->
+                <!-- <a-divider  /> -->
+                <!-- <a-input :id="`form_item_${field.name}`" :name="`form_item_${field.name}`" @input="fieldChange" @change="fieldChange" v-model:value="internalForm[field.name]" v-bind="field.props" /> -->
+                <input>
+              </template>
+              <template v-else-if="field.component === 'hr'">
+                <a-divider style="height: 10px;border-color: #7cb305" dashed>{{ field.name }}</a-divider>
+                <!-- <a-divider  /> -->
+              </template>
               <!-- <template v-else>
                 <component
                   :is="field.component"
@@ -183,10 +211,10 @@ const rangePresets = ref(arrRange);
 const onRangeChange = async(dates: RangeValue|null, dateStrings: string[]) => {
   // 重置
   // Object.assign(rangePresets.value,arrRange);
-  console.log("dates:",dates);
-  console.log("dayjs:",dayjs());
+  // console.log("dates:",dates);
+  // console.log("dayjs:",dayjs());
   if (dates && dates[0]) {
-    console.log("dates内");
+    // console.log("dates内");
      // --- 打印 多少天，日期范围
      if(dates[0]&&dates[1] == null){
       console.log("只有1个数据");
@@ -210,6 +238,9 @@ const onRangeChange = async(dates: RangeValue|null, dateStrings: string[]) => {
      }
      if(dates[1]){
       totalDays.value = dates[1].diff(dates[0], 'day');
+      
+      // 存入 表单中
+      internalForm.contract_duration_days = dates[1].diff(dates[0], 'day');
      }
     console.log('From: ', dateStrings[0], ', to: ', dateStrings[1]);
     // console.log("");
@@ -225,14 +256,16 @@ const onRangeChange = async(dates: RangeValue|null, dateStrings: string[]) => {
 
 export type Field = {                  // 表单 配置信息
     name: string, 
-    label: string,
+    label?: string,
     type?: string,
     component: string,
     props?: {
       placeholder?: string,
-      options?: Array<{ value: number; label: string }>, // 修改这里的类型
+      options_str?: Array<{ value: string; label: string }>, // 修改这里的类型
+      options_num?: Array<{ value: number; label: string }>, // 修改这里的类型
       addonAfter?:string,
-      disabled?: boolean
+      disabled?: boolean,
+      style?: {}
     },
     span?: number                  // 空间划分
   };
@@ -242,8 +275,8 @@ const props = defineProps<{
   entityType: string,              // 案例：客户信息  ，作用：作为title标识
   action: string,                   // 案例： 创建  ，作用：作为title标识
   modelValue: Record<string, any> , // 获取从 diy.vue 传递来的 form数据 
-  fields: Array<Field>,
-  rules: Record<string, Rule[]> ,   // 表单规则
+  fields?: Array<Field>,
+  rules?: Record<string, Rule[]> ,   // 表单规则
 }>()
 
 
@@ -329,7 +362,8 @@ const addDomain = (fieldname: string | number) => {
     price:0,
   });
 };
-// ----  测试区域
+// ----  支付明细内容
+
 
 
 </script>

@@ -9,10 +9,15 @@
     :footer-style="{ textAlign: 'right' }"
     @close="onClose"
   >
-    <!-- 插槽 hearder -->
+  <template #extra>
     <slot name="header"></slot>
+  </template>
+    <!-- 插槽 hearder -->
+    
     <!-- 标签页  ----------------------------------------------------------- -->
     <div>
+      <!-- <a-spin :spinning="planStore.data.loading"> -->
+        <a-skeleton :loading="planStore.data.loading">
       <a-tabs
         v-model:activeKey="activeKey"
         hide-add
@@ -72,17 +77,28 @@
                 </tr>
               </tbody>
             </table>
-            <label for="initial_monthly_price">计租期开始约租金价格(元/每月):</label><input id="initial_monthly_price" name="initial_monthly_price" :disabled="true" :value="pane.initial_monthly_price">
+            <!-- <a-table :columns="columns" :dataSource="data" :pagination="false" >
+            
+            </a-table> -->
+
+
+
+            <label :for="`${pane.id}`+'initial_monthly_price'">计租期开始约租金价格(元/每月):</label><input :id="`${pane.id}`+'initial_monthly_price'" :name="`${pane.id}`+'initial_monthly_price'" :disabled="true" :value="pane.initial_monthly_price">
             <br>
-            <span>面积约(平方)：</span><input :disabled="true" :value="pane.total_area">
+            <label :for="`${pane.id}`+'total_area'">面积约(平方)：</label><input :id="`${pane.id}`+'total_area'" :name="`${pane.id}`+'total_area'" :disabled="true" :value="pane.total_area"><br>
             <h1>二、合同基础信息</h1>
-            <span>合同生效起始日期：</span><input :disabled="true" :value="dayjs(pane.startdate_and_enddate ? pane.startdate_and_enddate[0] : '').format('YYYY-MM-DD')"><br>
-            <!-- {{ dayjs(pane.startdate_and_enddate[0]).format('YYYY-MM-DD') }} -->
-            <span>合同生效截止日期：</span><input :disabled="true" :value="dayjs(pane.startdate_and_enddate ? pane.startdate_and_enddate[1] : '').format('YYYY-MM-DD')"><br>
-            <span>租金缴纳周期(每多少月)</span><input :disabled="true" :value="pane.payment_interval_months"><br>
-            <span>增长率条件(每多少月)：</span><input :disabled="true" :value="pane.increase_interval_months"><br>
-            <span>增长率(百分比)：</span><input :disabled="true" :value="pane.increase_rate"><br>
-            <span>押金：</span><input :disabled="true" :value="pane.deposit"><br>
+            <label :for="`${pane.id}`+'startdate_and_enddate[0]'">合同生效起始日期：</label><input :id="`${pane.id}`+'startdate_and_enddate[0]'" :name="`${pane.id}`+'startdate_and_enddate[0]'" :disabled="true" :value="dayjs(pane.startdate_and_enddate ? pane.startdate_and_enddate[0] : '').format('YYYY-MM-DD')"> <br/>
+            <label :for="`${pane.id}`+'startdate_and_enddate[1]'">合同生效截止日期：</label><input :id="`${pane.id}`+'startdate_and_enddate[1]'" :name="`${pane.id}`+'startdate_and_enddate[1]'" :disabled="true" :value="dayjs(pane.startdate_and_enddate ? pane.startdate_and_enddate[1] : '').format('YYYY-MM-DD')"><br/>
+            <label :for="`${pane.id}`+'contract_duration_days'">合同天数：</label><input :id="`${pane.id}`+'contract_duration_days'" :name="`${pane.id}`+'contract_duration_days'" :disabled="true" :value="pane.contract_duration_days"><br/>
+            <label :for="`${pane.id}`+'payment_interval_months'">租金缴纳周期(每多少月)</label><input :id="`${pane.id}`+'payment_interval_months'" :name="`${pane.id}`+'payment_interval_months'" :disabled="true" :value="pane.payment_interval_months"><br/>
+            <label :for="`${pane.id}`+'increase_interval_months'">增长率条件(每多少月)：</label><input :id="`${pane.id}`+'increase_interval_months'" :name="`${pane.id}`+'increase_interval_months'" :disabled="true" :value="pane.increase_interval_months"><br>
+            <label :for="`${pane.id}`+'increase_rate'">增长率(百分比)：</label><input :id="`${pane.id}`+'increase_rate'" :name="`${pane.id}`+'increase_rate'" :disabled="true" :value="pane.increase_rate"><br>
+            <label :for="`${pane.id}`+'deposit'">押金：</label><input :id="`${pane.id}`+'deposit'" :name="`${pane.id}`+'deposit'" :disabled="true" :value="pane.deposit"><br>
+
+            <!-- <span>租金缴纳周期(每多少月)</span><input :disabled="true" :value="pane.payment_interval_months"><br> -->
+            <!-- <span>增长率条件(每多少月)：</span><input :disabled="true" :value="pane.increase_interval_months"><br> -->
+            <!-- <span>增长率(百分比)：</span><input :disabled="true" :value="pane.increase_rate"><br> -->
+            <!-- <span>押金：</span><input :disabled="true" :value="pane.deposit"><br> -->
             <h1>三、总结-租赁押金和租金支付时间节点及具体金额</h1>
             <h4>押金情况</h4>
             <table border="1">
@@ -102,9 +118,12 @@
                 </tr>
               </tbody>
               </table>
+              <slot name="pay">
+
+              </slot>
               <h4>合同租金缴纳详情</h4>
               <!-- <a-table :dataSource="dataSource" :columns="columnsTwo" /> -->
-              <table border="1" v-if="pane.payment_detail">
+              <table border="1" v-if="pane?.payment_detail">
               <thead>
                 <tr>
                   <td>期数</td>
@@ -115,15 +134,18 @@
                   <td>备注</td>
                 </tr>
               </thead>
-              <tbody v-for="(payment,index) in pane.payment_detail" :key="index">
-              
+              <div>
+
+              </div>
+    
+              <tbody v-for="(payment,index) in pane.payment_detail.payment_details" :key="index">
               <tr >
-                <!-- <td>{{ index}}</td>
-                <td>{{ dayjs(payment.).format('YYYY-MM-DD') }}</td>
-                <td>{{ dayjs(payment.period_end).format('YYYY-MM-DD') }}</td>
-                <td>{{ payment.amount }}</td>
-                <td>{{ dayjs(payment.due_date).format('YYYY-MM-DD') }}</td>
-                <td>{{ payment.remarks }}</td> -->
+                <td>{{ index}}</td>
+                <td>{{ dayjs(payment?.period_start).format('YYYY-MM-DD') }}</td>
+                <td>{{ dayjs(payment?.period_end).format('YYYY-MM-DD') }}</td>
+                <td>{{ payment?.amount }}</td>
+                <td>{{ dayjs(payment?.due_date).format('YYYY-MM-DD') }}</td>
+                <td>{{ payment?.remarks }}</td>
               </tr>
             </tbody>
               </table>
@@ -131,6 +153,9 @@
         
         </a-tab-pane>
       </a-tabs>
+    </a-skeleton>
+    <!-- </a-spin> -->
+
     </div>
 
     <hr />
@@ -146,7 +171,7 @@ import { onMounted, reactive, ref, watch } from 'vue'
 import { usePagination } from 'vue-request'
 import { usePlanStore } from '@/stores/plan'
 import { useClientStore } from '@/stores/client'
-import type{PlanBackEndDTO ,DynamicFieldDTO} from '@/api';
+import type{PlanBackEndDTO} from '@/api';
 import dayjs from 'dayjs';
 const planStore = usePlanStore()
 const clientStore = useClientStore()
@@ -161,23 +186,28 @@ let dataSound = reactive([
 // ------------------- 抽屉层相关事件 -----------------------------
 const open = ref<boolean>(false)
 
-const showDrawer = async () => {
+const showDrawer = async() => {
   open.value = true
+  await planStore.readByClientId(clientStore.data.selectID as string)
   // 逻辑梳理
-  if (clientStore.data.selectID) {
-    planStore.readByClientId(clientStore.data.selectID as string)
-  }
+  // if (clientStore.data.selectID) {
+  //  await planStore.readByClientId(clientStore.data.selectID as string)
+  //   // console.log("openDrawerPlan:---",plan);
+    
+  //       // tab 初始化
+  //   if (
+  //     planStore?.data.selectID === undefined ||
+  //     planStore?.data.selectID === '' ||
+  //     planStore?.data.selectID === ''
+  //   ) {
+  //     console.log('test--:',planStore?.data?.items[0]?.id)
+      
+  //     planStore.data.selectID = planStore?.data?.items[0]?.id as string;
+  //     activeKey.value = planStore?.data?.items[0]?.id
+  //   }
+  // }
 
-  // tab 初始化
-  if (
-    planStore?.data.selectID === undefined ||
-    planStore?.data.selectID === '' ||
-    planStore?.data.selectID === ''
-  ) {
-    console.log('test')
-    planStore.data.selectID = planStore?.data?.items[0]?.id as string;
-    activeKey.value = planStore?.data?.items[0]?.id
-  }
+
 }
 
 const onClose = () => {
@@ -239,13 +269,14 @@ const columns = [
     title: '单价(人民币)',
     dataIndex: 'first_price',
     width: '15%'
-  },
-  {
-    title: '租金(元/平方米/月)',
-    dataIndex: 'rent',
-    width: '15%'
   }
 ]
+
+// const paneData = (pane: any) => [
+//   { index: '1', first_name: pane.first_name, first_area: pane.first_area, first_price: pane.first_price },
+//   { index: '2', first_name: pane.second_name, first_area: pane.second_area, first_price: pane.second_price },
+//   { index: 3, first_name: pane.third_name, first_area: pane.third_area, first_price: pane.third_price }
+// ]
 
 const data = [{ first_name: '1', first_area: '123', first_price: 'faf' }]
 // ----------------------------------------
