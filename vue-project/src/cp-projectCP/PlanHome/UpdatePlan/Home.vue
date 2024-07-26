@@ -22,7 +22,8 @@ import type { Rule } from 'ant-design-vue/es/form'
 import { ref } from 'vue';
 import type {Field} from '@/cp-v1/cp-GCP/Drawer/DrawerSlot4.vue';
 import type { PlanDTO } from '@/api';
-import { generatePaymentDetails } from '../tool/calPayment';
+// import { generatePaymentDetails } from '../tool/calPayment';
+import { paymentMainFun } from '../tool';
 
 // import {reactive } from 'vue';
 
@@ -328,8 +329,8 @@ const fieldChange = async (form: PlanDTO) => {
 
 // ---------------------------------------------------------
 // 先看是否符合 计算 支付明细 的 条件
-const payment = generatePaymentDetails(form);
-console.log("form---------------:",payment);
+const {paymentDetails} = paymentMainFun(form);
+// console.log("form---------------:",payment);
 console.log("form---------------:",form);
 
   // 如果支持，就开始进行计算，根据计算结果，用得到的 json格式 来 修改 pinia层 planStore.data.item  中的 payment对象。

@@ -1,120 +1,163 @@
-import type { PlanDTO } from "@/api";
-import type { PaymentDetailItemVO } from "@/cp-projectCP/PaymentDetailItemHome/Vo/paymentDetailItem.vo";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs, { Dayjs } from 'dayjs';
+import { ref } from 'vue';
+import { calculateTotalMonthsAndDays } from './helpersFun-dayjs';
+import type { PlanDTO } from '@/api';
+import { calculatePeriodDates } from './helpersFun-payment';
 
-function getValidNumber(value: any, defaultValue: number): number {
-  return value === undefined || value === null || value === '' ? defaultValue : Number(value);
-}
+// 计划输入值
+const plan = {
+  average_price: 35, // 平均价格
+  total_area: 54.83, // 总面积
+  startdate_and_enddate: ["2023-05-24", "2026/04/5"], // 开始和结束日期
+  payment_interval_months: 12, // 支付间隔月数
+  initial_monthly_price: 1919.05, // 初始月价格
+  contract_duration_days: 1095, // 合同持续天数
+  rent_free_months: 6, // 免租期月数
+  increase_interval_months: 12, // 增长间隔月数
+  increase_rate: 0.03, // 增长率
+};
 
-function getValidDate(value: any, defaultValue: Dayjs): Dayjs {
-  return value === undefined || value === null || value === '' ? defaultValue : dayjs(value);
-}
 
-export function generatePaymentDetails(plan: PlanDTO): PaymentDetailItemVO[] {
-  const paymentDetails: PaymentDetailItemVO[] = [];
-  const startDate = getValidDate(plan?.startdate_and_enddate?.[0], dayjs()); // 默认当前日期
-  const endDate = getValidDate(plan?.startdate_and_enddate?.[1], dayjs()); // 默认当前日期
-  const totalDays = endDate.diff(startDate, 'day'); // 总天数
-  const paymentIntervalMonths = getValidNumber(plan?.payment_interval_months, 1); // 支付间隔（月），默认为1个月
-  const initialMonthlyPrice = getValidNumber(plan?.initial_monthly_price, 0); // 初期每月费用，默认为0
-  const contractDurationDays = getValidNumber(plan?.contract_duration_days, totalDays); // 合同的天数，默认为总天数
-  const rentFreeMonths = getValidNumber(plan?.rent_free_months, 0); // 免租期（月），默认为0
-  const increaseIntervalMonths = getValidNumber(plan?.increase_interval_months, 12); // 增长率间隔（月），默认为12个月
-  const increaseRate = plan?.increase_rate === undefined || plan?.increase_rate === null ? 1 : Number(plan?.increase_rate); // 增长率（百分比），如果为 undefined 则默认为 1
+// ------------------------------------------------------------------------
+// 步骤1: 计算每期的开始和结束日期
+// calculatePeriodDates(plan);
 
-  // 计算总金额
-  let totalAmount = 0;
-  let remainingDays = contractDurationDays;
-  let currentPrice = initialMonthlyPrice;
+// 步骤2: 计算每期中有多少个月要收租金的数组
+function calculateMonthsArray(PeriodStarts: string[], PeriodEnds: string[], numberOfPeriods: number) {
+  const monthsArray: number[][] = []; // 每期的月份数组
 
-  console.log(`初期每月费用: ${initialMonthlyPrice}`);
-  console.log(`合同的天数: ${contractDurationDays}`);
-  console.log(`支付间隔（月）: ${paymentIntervalMonths}`);
-  console.log(`免租期（月）: ${rentFreeMonths}`);
-  console.log(`增长率间隔（月）: ${increaseIntervalMonths}`);
-  console.log(`增长率（百分比）: ${increaseRate}`);
-
-  while (remainingDays > 0) {
-    const daysInCurrentInterval = Math.min(paymentIntervalMonths * 30, remainingDays);
-    totalAmount += currentPrice * (daysInCurrentInterval / 30);
-    console.log(`当前支付周期天数: ${daysInCurrentInterval}`);
-    console.log(`当前价格: ${currentPrice}`);
-    console.log(`当前总金额: ${totalAmount}`);
-    remainingDays -= daysInCurrentInterval;
-    if (remainingDays > 0) {
-      currentPrice *= (1 + increaseRate);
+  // console.log('步骤2: 计算每期中有多少个月要收租金的数组');
+  for (let i = 0; i < numberOfPeriods; i++) {
+    const startPeriod = dayjs(PeriodStarts[i]);
+    const endPeriod = dayjs(PeriodEnds[i]);
+    const months = endPeriod.diff(startPeriod, 'month') + 1;
+    const monthsInPeriod = new Array(months).fill(plan.average_price * plan.total_area); // 每个月的金额数组
+    if (i === numberOfPeriods - 1 && plan.rent_free_months > 0) {
+      monthsInPeriod.fill(0, 0, plan.rent_free_months); // 最后一期的免租期
     }
+    monthsArray.push(monthsInPeriod);
+    // console.log(`第${i + 1}期的月份数组:`, monthsInPeriod);
   }
 
-  console.log(`计算后的合同总金额: ${totalAmount}`);
-  console.log(`总天数: ${totalDays}`);
-  console.log(`支付次数: ${Math.floor(totalDays / (paymentIntervalMonths * 30))}`);
-
-  let currentPeriodStart = startDate as Dayjs;
-  let remainingAmount = totalAmount; // 剩余金额
-  let periodNumber = 1;
-  let marks = "";
-
-  const paymentIntervals = []; // 用来存储每个支付周期的结束日期
-  let tempDate = startDate;
-
-  // 生成支付周期的结束日期
-  while (tempDate.isBefore(endDate)) {
-    const nextDate = tempDate.add(paymentIntervalMonths, 'month').subtract(1, 'day');
-    paymentIntervals.push(nextDate);
-    tempDate = nextDate.add(1, 'day');
-  }
-
-  const numberOfPayments = paymentIntervals.length;
-
-  for (let i = 0; i < numberOfPayments; i++) {
-    const currentPeriodEnd = paymentIntervals[i];
-    let dueDate;
-
-    if (i === 0) {
-      dueDate = currentPeriodStart.add(3, 'day'); // 第一个对象的 due_date 添加 3 天
-    } else {
-      dueDate = currentPeriodStart.subtract(1, 'month'); // 其他对象的 due_date 减少 1 个月
-    }
-
-    // 计算每期的金额
-    let amount = Number((remainingAmount / (numberOfPayments - i)).toFixed(2));
-    // 根据增长率调整金额
-    amount = amount * (1 + increaseRate * Math.floor(i / increaseIntervalMonths));
-
-    paymentDetails.push({
-      period_start: currentPeriodStart.format('YYYY-MM-DD'),
-      period_end: currentPeriodEnd.format('YYYY-MM-DD'),
-      amount, // 每期金额
-      due_date: dueDate.format('YYYY-MM-DD'),
-      is_paid: false,
-      is_split_payment: false,
-      remarks: marks
-    });
-
-    remainingAmount -= amount; // 更新剩余金额
-    currentPeriodStart = currentPeriodEnd.add(1, 'day');
-    periodNumber++;
-  }
-
-  // 处理免租期
-  const rentFreePeriodStart = currentPeriodStart;
-  const rentFreePeriodEnd = rentFreePeriodStart.add(rentFreeMonths, 'month').subtract(1, 'day');
-  const rentFreeDueDate = rentFreePeriodStart.add(rentFreeMonths, 'month').add(3, 'day');
-  marks = "3个月减免";
-
-  paymentDetails.push({
-    period_start: rentFreePeriodStart.format('YYYY-MM-DD'),
-    period_end: rentFreePeriodEnd.format('YYYY-MM-DD'),
-    amount: 0, // 免租期金额为 0
-    due_date: rentFreeDueDate.format('YYYY-MM-DD'),
-    is_paid: false,
-    is_split_payment: false,
-    remarks: marks
-  });
-
-  // 如果不需要最后一个支付明细，则移除它
-  paymentDetails.pop();
-
-  return paymentDetails;
+  return monthsArray;
 }
+
+// 步骤3: 计算每期的金额
+function calculateAmounts(PeriodStarts: string[], PeriodEnds: string[], numberOfPeriods: number) {
+  const Amount: number[] = []; // 每期的金额数组
+
+  // console.log('步骤3: 计算每期的金额');
+  for (let i = 0; i < numberOfPeriods; i++) {
+    const startPeriod = dayjs(PeriodStarts[i]);
+    const endPeriod = dayjs(PeriodEnds[i]);
+    const monthsInPeriod = endPeriod.diff(startPeriod, 'month') + 1;
+    const increaseMultiplier = Math.pow(1 + plan.increase_rate, i); // 增长倍数
+    Amount.push(monthsInPeriod * plan.average_price * plan.total_area * increaseMultiplier);
+    // console.log(`第${i + 1}期的金额:`, Amount[i]);
+  }
+
+  return Amount;
+}
+
+// // 步骤4: 生成支付详情
+// export function generatePaymentDetails() {
+//   const { periodStarts, periodEnds, numberOfPeriods } = calculatePeriodDates(plan,current);
+//   const Amount = calculateAmounts(periodStarts, periodEnds, numberOfPeriods);
+//   const monthsArray = calculateMonthsArray(periodStarts, periodEnds, numberOfPeriods);
+
+//   const Due_date: string[] = []; // 每期的到期日期数组
+//   const Remarks: string[] = []; // 每期的备注数组
+//   const paymentDetails: any[] = []; // 支付详情数组
+
+//   // console.log('步骤4: 生成支付详情');
+//   for (let i = 0; i < numberOfPeriods; i++) {
+//     const currentEndDate = dayjs(periodEnds[i]);
+//     const dueDate = currentEndDate.add(1, 'month').startOf('month'); // 每期的到期日期
+//     Due_date.push(dueDate.format('YYYY-MM-DD'));
+
+//     if (i === numberOfPeriods - 1 && plan.rent_free_months > 0) {
+//       Remarks.push(`免租期：${plan.rent_free_months}个月`);
+//     } else {
+//       Remarks.push(''); // 没有免租期的备注为空
+//     }
+
+//     const detail = {
+//       period_start: periodStarts[i], // 期开始日期
+//       period_end: periodEnds[i], // 期结束日期
+//       amount: Amount[i], // 金额
+//       due_date: Due_date[i], // 到期日期
+//       is_paid: false, // 是否支付
+//       is_split_payment: false, // 是否分期支付
+//       remarks: Remarks[i], // 备注
+//     };
+//     paymentDetails.push(detail);
+
+//     // console.log(`第${i + 1}期的支付详情:`, detail);
+//   }
+
+//   const getdata = calculatePaymentSchedule(plan.startdate_and_enddate,plan.payment_interval_months,plan.rent_free_months);
+//   console.log('----------------------------最终结果:',getdata);
+//   // console.log('  PeriodStarts:', PeriodStarts);
+//   // console.log('  PeriodEnds:', PeriodEnds);
+//   // console.log('  Amount:', Amount);
+//   // console.log('  Due_date:', Due_date);
+//   // console.log('  Remarks:', Remarks);
+//   // console.log('  每期月份数组:', monthsArray);
+
+//   return paymentDetails;
+// }
+
+
+
+// 定义函数，参数与原函数一致
+export const calculatePaymentSchedule = (
+  startdate_and_enddate:string[],
+  paymentIntervalMonths: number, // 支付间隔月份
+  rentFreeMonths: number, // 免租期月份,
+ 
+): number[] => {
+
+  const paymentSchedule: number[] = [];
+  const paymentSchedule_day:number[] = [];
+  // 明确概念 什么是 1个月， 是什么1年，什么是 月占比
+  // 有没有一种方式，记录 月份信息 和 天数信息，更精确的提高计算金额。
+
+  // 输入对象
+  const startDate = dayjs(startdate_and_enddate[0]);
+  const endDate = dayjs(startdate_and_enddate[1]);
+
+  // 计算两个日期之间的月份数 以及 天数 -------------------
+  calculateTotalMonthsAndDays(startDate,endDate);
+    
+
+    // 计算两个日期之间的月份数 -------------------
+ endDate.subtract(1,'month')
+const monthsBetween = endDate.add(1,'day').diff(startDate, 'month');
+  // 通过 contractDurationDays 计算得到的总租赁月份
+  
+  const totalLeaseMonths = monthsBetween;
+  console.log("totalLeaseMonths:",totalLeaseMonths);
+  // 租赁期限扣除免租期后的有效租赁月份
+  let effectiveLeaseMonths = totalLeaseMonths - rentFreeMonths;
+  console.log("effectiveLeaseMonths:",effectiveLeaseMonths);
+  // 计算需要的支付周期数
+  const numPeriods = Math.ceil(effectiveLeaseMonths / paymentIntervalMonths) + 1;
+  console.log("numPeriods:",numPeriods);
+  console.log("paymentIntervalMonths:",paymentIntervalMonths);
+  
+  for (let i = 0; i < numPeriods; i++) {
+      if (effectiveLeaseMonths >= paymentIntervalMonths) { // 常规情况
+          paymentSchedule.push(paymentIntervalMonths); // 添加支付周期
+          effectiveLeaseMonths -= paymentIntervalMonths; // 减少有效租赁月份
+      } else if (effectiveLeaseMonths > 0) { // 剩余月份小于支付周期
+          paymentSchedule.push(effectiveLeaseMonths); // 添加剩余月份
+          effectiveLeaseMonths = 0; // 剩余有效租赁月份为零
+      } else { // 免租期
+          paymentSchedule.push(rentFreeMonths); // 添加免租期
+      }
+  }
+
+  console.log("paymentSchedule", paymentSchedule);
+  return paymentSchedule;
+};
+
