@@ -22,6 +22,11 @@ import router from './router'
 
 // ## ------------------------------ dayjs
 // import dayjsPlugin from '@/plugins/dayjs';
+// import enUS from 'ant-design-vue/es/locale/en_US';
+// import zhCN from 'ant-design-vue/es/locale/zh_CN';
+// import dayjs from "dayjs";
+// import 'dayjs/locale/zh-cn'; // 导入中文语言包
+// dayjs.locale('zh-cn'); // 设置全局语言为中文
 
 // # ---- vue-print-next 打印预览 ---
 import {printPlugin} from 'vue-print-next';

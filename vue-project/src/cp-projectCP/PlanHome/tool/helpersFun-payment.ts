@@ -1,7 +1,13 @@
-import type { PlanDTO } from "@/api";
-import dayjs from "dayjs";
+import type { PaymentDetailItemDTO } from "@/api";
+import dayjs, { Dayjs } from "dayjs";
+
 import { limitDecimalPlaces } from "./helpersFun-dayjs";
 import type { PaymentDetailItemVO } from "@/cp-projectCP/PaymentDetailItemHome/Vo/PaymentDetailItem.vo";
+import type { Field } from "@/cp-v1/cp-GCP/Drawer/DrawerSlot4.vue";
+import type { PlanDTO } from "./calPayment2";
+// import 'dayjs/locale/zh-cn';
+
+// dayjs.locale('cn');
 
 /**
  * 计算每期的开始和结束日期
@@ -58,7 +64,7 @@ export function calculatePeriodDates2(planObj: PlanDTO,fullMonths:number,lastMon
     const rentFreeMonths = planObj.rent_free_months ?? 0; // 免租期
     const paymentIntervalMonths = planObj.payment_interval_months ?? 1; // 付款间隔，避免除以零
 
-    const periodStarts: string[] = []; // 每期开始日期数组
+    const periodStarts: Dayjs[] = []; // 每期开始日期数组
     
     // 
 
@@ -73,11 +79,13 @@ export function calculatePeriodDates2(planObj: PlanDTO,fullMonths:number,lastMon
 
     // 期间开始  ----------------------------------------------------------------------------------
     calFullMonths = calFullMonths - rentFreeMonths;
-    periodStarts.push(calMonthsDate.format('YYYY/MM/DD'));
+    // periodStarts.push(calMonthsDate.format('YYYY/MM/DD'));
+    periodStarts.push(calMonthsDate);
     while(calFullMonths>=paymentIntervalMonths && calOtherValue != otherValue.length-1){
 
         calMonthsDate = calMonthsDate.add(paymentIntervalMonths,'month');
-        periodStarts.push(calMonthsDate.format('YYYY/MM/DD'));
+        // periodStarts.push(calMonthsDate.format('YYYY/MM/DD'));
+        periodStarts.push(calMonthsDate);
  
         // console.log("------------------ok,",periodStarts,periodEnds);
         calFullMonths -= paymentIntervalMonths;
@@ -89,7 +97,8 @@ export function calculatePeriodDates2(planObj: PlanDTO,fullMonths:number,lastMon
 
     //-----
     calMonthsDate = calMonthsDate.add(calFullMonths,'month');
-    periodStarts.push(calMonthsDate.format('YYYY/MM/DD'))
+    // periodStarts.push(calMonthsDate.format('YYYY/MM/DD'))
+    periodStarts.push(calMonthsDate)
 
     // ----------------------------------------------------------------------------------
 
@@ -149,7 +158,7 @@ export function calculatePeriodDates3(planObj: PlanDTO,fullMonths:number,lastMon
     // const numberOfPeriods = Math.ceil(rentFreeMonths / paymentIntervalMonths) + Math.ceil((totalMonths - rentFreeMonths) / paymentIntervalMonths); // 期数
 
     // const periodStarts: string[] = []; // 每期开始日期数组
-    const periodEnds: string[] = []; // 每期结束日期数组
+    const periodEnds: Dayjs[] = []; // 每期结束日期数组
 
     // eslint-disable-next-line prefer-const
     let currentDate = startDate;  // 当前期间开始
@@ -162,18 +171,22 @@ export function calculatePeriodDates3(planObj: PlanDTO,fullMonths:number,lastMon
         if(index==0){
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             currentDate = startDate.add(paymentIntervalMonths,'month').subtract(1,'day');
-            periodEnds.push(currentDate.format('YYYY-MM-DD'));
+            periodEnds.push(currentDate);
+            // periodEnds.push(currentDate.format('YYYY-MM-DD'));
         }else if(index == otherValue.length-2){
             // currentDate = currentDate.add(paymentIntervalMonths,'month');
             // currentDate = currentDate.add(lastMonthDays,'day');
             currentDate = endDate.subtract(rentFreeMonths,'month');
-            periodEnds.push(currentDate.format('YYYY-MM-DD'));
+            // periodEnds.push(currentDate.format('YYYY-MM-DD'));
+            periodEnds.push(currentDate);
         }else if(index == otherValue.length-1){
             // currentDate = currentDate.add(rentFreeMonths,'month');
-            periodEnds.push(endDate.format('YYYY-MM-DD'));
+            // periodEnds.push(endDate.format('YYYY-MM-DD'));
+            periodEnds.push(endDate);
         }else{
             currentDate = currentDate.add(paymentIntervalMonths,'month');
-            periodEnds.push(currentDate.format('YYYY-MM-DD'));
+            // periodEnds.push(currentDate.format('YYYY-MM-DD'));
+            periodEnds.push(currentDate);
         }
         
     }
@@ -410,8 +423,8 @@ export function calculateMonthsArray(plan:PlanDTO,currentMonths:any) {
  * @param {any} paymentAmountArr:number[]
  * @returns {any}
  */
- export function resultsFun(periodStarts:string[],periodEnds:string[],paymentAmountArr:number[],due_dateArr:string[],remarksArr:string[]){
-    const paymentDetails: PaymentDetailItemVO[] = [];
+ export function resultsFun(periodStarts:Dayjs[],periodEnds:Dayjs[],paymentAmountArr:number[],due_dateArr:Dayjs[],remarksArr:string[]){
+    const paymentDetails: PaymentDetailItemDTO[] = [];
     for (let i = 0; i < periodStarts.length; i++) {
         paymentDetails.push({
           period_start: periodStarts[i], // 期间开始
@@ -436,16 +449,18 @@ export function calculateMonthsArray(plan:PlanDTO,currentMonths:any) {
  * @param {any} periodStarts:string[]
  * @returns {any}
  */
-export function due_dateFun(periodStarts:string[]){
+export function due_dateFun(periodStarts:Dayjs[]){
     // let elementDate = periodStarts;
-    const due_dateArr:string[] = [];
+    const due_dateArr:Dayjs[] = [];
     for (let index = 0; index < periodStarts.length; index++) {
         const element = dayjs(periodStarts[index]);
         if(index==0){
             
-            due_dateArr.push(element.add(3,'day').format('YYYY-MM-DD'));
+            // due_dateArr.push(element.add(3,'day').format('YYYY-MM-DD'));
+            due_dateArr.push(element.add(3,'day'));
         }else{
-            due_dateArr.push(element.subtract(1,'month').format('YYYY-MM-DD'));
+            // due_dateArr.push(element.subtract(1,'month').format('YYYY-MM-DD'));
+            due_dateArr.push(element.subtract(1,'month'));
         }
     }
     return {due_dateArr}
@@ -472,4 +487,23 @@ export function remarksFun(plan:PlanDTO,rentPaymentMonthsCycleArray:number[]){
         
     }
     return {remarksArr}
+}
+
+
+// ------------------------------- 插入 某变量数组中，动态生成表单配置内容 ------
+
+
+// 函数定义
+export function insertInputFieldsFromJson(data: PaymentDetailItemVO[], fields: Field[]) {
+    data.forEach((item, index) => {
+        // 根据 json 数据生成对应的 input 字段 
+        // item.
+        fields.push({
+            name: `amount_${index}`, // 可以根据需要自定义名称
+            label: `金额${index + 1}`, // 可以根据需要自定义标签
+            component: 'a-input-number',
+            props: { placeholder: `Enter amount for period ${index + 1}`, addonAfter: "元" },
+            span: 8
+        });
+    });
 }

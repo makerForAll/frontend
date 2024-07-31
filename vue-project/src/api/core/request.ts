@@ -16,7 +16,7 @@ axiosInstance.interceptors.request.use(
 	(config) => {
 	  // 发送请求之前做些什么
 	  // config.params = { ...config.params, icode: 'E4993F09B37DE0E4' };
-    console.log("发送请求之前做些什么");
+    console.log("发送请求之前做些什么",config.data);
 	  return config;
 	},
 	(error) => {
@@ -31,11 +31,12 @@ axiosInstance.interceptors.request.use(
 	  // 2xx 范围内的状态码都会触发该函数。
 	  // 对响应数据做点什么
     //   console.log(" 对响应数据做点什么-------------:-",response);
-    //   console.log(" 对响应数据做点什么TEST--------------:",response);
+      console.log(" 对响应数据做点什么TEST--------------:",response.data);
     if (response.data) {
+        // Object.assign()
         response.data = convertDatesToDayjs(response.data);
     }
-    console.log(" 对响应数据--------------:",response.data.results.data);
+    console.log(" 对响应数据--------------:",response.data);
       // --------------------- 数据转换 ---------------------------------
       
 	  return response;
@@ -45,6 +46,20 @@ axiosInstance.interceptors.request.use(
 	  // 对响应错误做点什么
 	  const newError = new Error(error.response?.data?.message || 'Unknown error');
 	  return Promise.reject(newError);
+    // if (error.response) {
+    //     // 请求成功发出且服务器也响应了状态码，但状态代码超出了 2xx 的范围
+    //     console.error('Error response:', error.response);
+    //     return Promise.reject(error.response.data);
+    //   } else if (error.request) {
+    //     // 请求已经成功发起，但没有收到响应
+    //     console.error('Error request:', error.request);
+    //     return Promise.reject({ message: 'No response from server' });
+    //   } else {
+    //     // 发送请求时出了点问题
+    //     console.error('Error message:', error.message);
+    //     return Promise.reject({ message: error.message });
+    //   }
+
 	}
   );
 
@@ -175,6 +190,7 @@ import type { OpenAPIConfig } from '@/api/core/OpenAPI';
 import { message } from 'ant-design-vue';
 import useMessage from 'ant-design-vue/es/message/useMessage';
 import { convertDatesToDayjs } from '@/custom/tools/convertDates';
+import { convertDatesToDayjs2 } from '@/custom/tools/convertDates2';
 // import { log } from 'console';
 
 export const isDefined = <T>(value: T | null | undefined): value is Exclude<T, null | undefined> => {

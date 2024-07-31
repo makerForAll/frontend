@@ -11,11 +11,13 @@ export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
 export type { ClientDTO } from './models/ClientDTO';
+export type { CreatePlanDTO } from './models/CreatePlanDTO';
 export type { DynamicFieldDTO } from './models/DynamicFieldDTO';
 export type { Party } from './models/Party';
 export type { PaymentDetailItemDTO } from './models/PaymentDetailItemDTO';
 export type { PaymentPlanSplitDTO } from './models/PaymentPlanSplitDTO';
-export type { PlanDTO } from './models/PlanDTO';
+export type { ReadPlanDTO } from './models/ReadPlanDTO';
+export type { UpdatePlanDTO } from './models/UpdatePlanDTO';
 
 export { ClientService } from './services/ClientService';
 export { PartyService } from './services/PartyService';

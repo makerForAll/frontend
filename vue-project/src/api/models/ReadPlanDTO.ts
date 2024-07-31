@@ -5,11 +5,7 @@
 import type { ClientDTO } from './ClientDTO';
 import type { DynamicFieldDTO } from './DynamicFieldDTO';
 import type { PaymentDetailItemDTO } from './PaymentDetailItemDTO';
-export type PlanDTO = {
-    /**
-     * id
-     */
-    id?: string;
+export type ReadPlanDTO = {
     /**
      * 方案名称
      */
@@ -133,6 +129,10 @@ export type PlanDTO = {
     /**
      * 支付明细
      */
-    payment_detail_item?: PaymentDetailItemDTO;
+    payment_detail_item?: Array<PaymentDetailItemDTO>;
+    /**
+     * ID
+     */
+    id: string;
 };
 

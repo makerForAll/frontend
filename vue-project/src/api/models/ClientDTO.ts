@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { PlanDTO } from './PlanDTO';
+import type { ReadPlanDTO } from './ReadPlanDTO';
 export type ClientDTO = {
     /**
      * 客户端ID
@@ -39,6 +39,6 @@ export type ClientDTO = {
     /**
      * 计划
      */
-    plan?: Array<PlanDTO>;
+    plan?: Array<ReadPlanDTO>;
 };
 

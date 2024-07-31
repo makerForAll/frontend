@@ -2,8 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { Dayjs } from 'dayjs';
 import type { PaymentPlanSplitDTO } from './PaymentPlanSplitDTO';
-import type { PlanDTO } from './PlanDTO';
+import type { ReadPlanDTO } from './ReadPlanDTO';
 export type PaymentDetailItemDTO = {
     /**
      * ID
@@ -12,11 +13,11 @@ export type PaymentDetailItemDTO = {
     /**
      * 开始期间
      */
-    period_start: string;
+    period_start: Dayjs;
     /**
      * 介绍期间
      */
-    period_end: string;
+    period_end: Dayjs;
     /**
      * 金额
      */
@@ -24,7 +25,7 @@ export type PaymentDetailItemDTO = {
     /**
      * 到期时间
      */
-    due_date: string;
+    due_date: Dayjs;
     /**
      * 是否已支付
      */
@@ -40,7 +41,7 @@ export type PaymentDetailItemDTO = {
     /**
      * 方案
      */
-    plan?: PlanDTO;
+    plan?: ReadPlanDTO;
     /**
      * 分期付款计划
      */

@@ -2,12 +2,14 @@
   <DrawerSlotView
     :action="'修改'"
     :entityType="'方案'"
-    v-model="planStore.data.item"
+    v-model="planStore.data.UItem"
     :fields="planFields"
     :rules="rules"
     @handleSubmit="handleSubmit"
     @fieldChange="fieldChange"
     @showDrawer="showDrawer"
+    @generatePaymentDetails="generatePaymentDetails"
+    :loading="planStore.data.loading"
   >
   </DrawerSlotView>
 </template>
@@ -19,11 +21,14 @@ import DrawerSlotView from '@/cp-v1/cp-GCP/Drawer/DrawerSlot4.vue'
 import { useClientStore } from '@/stores/client';
 import { usePlanStore } from '@/stores/plan'
 import type { Rule } from 'ant-design-vue/es/form'
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import type {Field} from '@/cp-v1/cp-GCP/Drawer/DrawerSlot4.vue';
-import type { PlanDTO } from '@/api';
+// import {  type PlanDTO } from '@/api';
 // import { generatePaymentDetails } from '../tool/calPayment';
 import { paymentMainFun } from '../tool';
+import { insertInputFieldsFromJson } from '../tool/helpersFun-payment';
+import type { UPlanVO } from '@/custom/api/models/models-plan';
+import type { PaymentDetailItemDTO } from '@/api';
 
 // import {reactive } from 'vue';
 
@@ -226,14 +231,20 @@ const planFields:Field[] = [
   { name: 'rent_free_months', label: 'JM', component: 'a-input-number', props: { placeholder: 'Enter rent free (months)' , addonAfter:"月"} ,span: 8},
   { name: 'remarks', label: '备注信息', component: 'a-input', props: { placeholder: 'Enter remarks'} },
   { name: '支付明细', component: 'hr', props: { placeholder: 'Enter remarks'} },
-  // { name: '支付明细', component: 'hr', props: { placeholder: 'Enter remarks'} },
-  // {
-  //   name: 'first_price',
-  //   label: '价格1',
-  //   component: 'a-input-number',
-  //   props: { placeholder: 'Enter first price' ,addonAfter:"¥" },
-  //   span: 8
-  // },
+  { name: '支付明细', component: 'hr', props: { placeholder: 'Enter remarks'} },
+  {
+    name: 'payment_detail_item',
+    label: '支付明细',
+    labelNone:true,
+    component: 'a-input-group',
+    columns:['序号','期间开始','期间结束','金额(含税)','缴纳截止日期','备注'],
+    group:['period_start','period_end','amount','due_date','remarks'],
+    props: { 
+      placeholder: 'Enter first price' ,
+      addonAfter:'¥',
+    },
+    span: 24
+  },
 ]
 
 
@@ -257,7 +268,7 @@ const rules: Record<string, Rule[]> = {
   contract_type: [{ required: true, message: 'Please select contract type' }],
   contract_status: [{ required: true, message: 'Please select contract status' }],
   is_default: [{ required: true, message: 'Please enter record type' }],
-  // record_type: [{ required: true, message: 'Please enter record type' }],
+  startdate_and_enddate: [{ required: false, message: 'Please enter record type' }],
   // contract_duration_months: [{ required: true, message: 'Please enter contract duration (months)' }],
   // startdate_and_enddate: [{ required: false, message: 'Please select start date' }],
   // payment_interval_months: [{ required: true, message: 'Please enter payment interval (months)' }],
@@ -276,12 +287,17 @@ const rules: Record<string, Rule[]> = {
 const clientState=useClientStore();
 const planStore = usePlanStore()
 
+
+
 const showDrawer = async () => {
   // 重置form
   // await planStore.initState()
   // planStore.data.item.client = planStore.data.selectID;
+  // await planStore.initState()
   // 打开指定ID的plan在pinia中的数据
-await planStore.readById(planStore.data.selectID);
+// await planStore.readById(planStore.data.selectID);
+// console.log("返回的数据：",planStore.data.RItems.find(item => item.id === planStore.data.selectID));
+planStore.data.UItem = await planStore.data.RItems.find(item => item.id === planStore.data.selectID) as UPlanVO;
  
   // ---------------------------------------------
   // 没必要重新读取，应该直接从 ReadPlan 中获取！！然后存入 plan的 item中
@@ -320,7 +336,15 @@ const handleSubmit = async (form: any) => {
 //   third_price: 0,
 // });
 
-const fieldChange = async (form: PlanDTO) => {
+const generatePaymentDetails= async () =>{ // 生成支付明细
+  // 先看是否符合 计算 支付明细 的 条件
+const {paymentDetails} = paymentMainFun(planStore.data.UItem);
+// insertInputFieldsFromJson(paymentDetails,planFields);
+planStore.data.UItem.payment_detail_item = paymentDetails as PaymentDetailItemDTO[];
+}
+
+
+const fieldChange = async (form: UPlanVO) => {
 // 【响应式】检查 payment 中的 对象结构，如果有匹配的内容，就把 对应的 表单匹配信息 加入 planFields 中
 // payment中指 create payment时，几个关键的字段在修改数据时，会触发pinia层的计算，得出1个 payment的对象结构。
   // 思考
@@ -328,22 +352,23 @@ const fieldChange = async (form: PlanDTO) => {
 // 当有了1个结构，就可以 同时 动态 添加 表单的匹配信息到 planFields中。
 
 // ---------------------------------------------------------
-// 先看是否符合 计算 支付明细 的 条件
-const {paymentDetails} = paymentMainFun(form);
+
 // console.log("form---------------:",payment);
+// insertInputFieldsFromJson(paymentDetails,planFields);
 console.log("form---------------:",form);
 
   // 如果支持，就开始进行计算，根据计算结果，用得到的 json格式 来 修改 pinia层 planStore.data.item  中的 payment对象。
   // 检测 payment中 是否有内容
+
+
     // 如果 有内容，开始识别，构建 在 planFields 中添加几个表单的json信息，然后添加 到 planFields【动态的】
 
 // --------------------------------------------------
-planStore.runCal(); // 计算 总面积 和 平均单价
+planStore.runCal('update'); // 计算 总面积 和 平均单价
 
-planStore.data.item = form
+planStore.data.UItem = form
 
 }
 // -------------------------------------  pinia层 数据交互 -------------------------------------------------------------------
 </script>
-
 <style scoped></style>

@@ -1,16 +1,19 @@
 import type { PlanDTO } from '@/api';
 import { calculateAmountsAndPeriods, calculateMonthsArray, calculatePeriodDates, calculatePeriodDates2, calculatePeriodDates3, due_dateFun, paymentAmountCycleArray, remarksFun, resultsFun, transferArrayFun } from './helpersFun-payment';
 import { calculateTotalMonthsAndDays } from './helpersFun-dayjs';
-import dayjs from 'dayjs';
+// import dayjs from 'dayjs';
 import type { PaymentDetailItemVO } from '@/cp-projectCP/PaymentDetailItemHome/Vo/PaymentDetailItem.vo';
 
-
-
+import dayjs, {type Dayjs } from 'dayjs';
+// import 'dayjs/locale/zh-cn';
+// dayjs.locale('cn');
 // 定义函数，接收计划数据并返回相关计算结果
 export function paymentMainFun(plan: PlanDTO) {
 //-------------------------------------
 const startdate = dayjs(plan.startdate_and_enddate?.[0]);
+console.log("🚀 ~ paymentMainFun ~ startdate:", startdate)
 const enddate = dayjs(plan.startdate_and_enddate?.[1])
+console.log("🚀 ~ paymentMainFun ~ enddate:", enddate)
 
 // ------------------------------------------------------------------------------------------------
 // 步骤一
@@ -128,7 +131,7 @@ console.log("🚀 ~ paymentMainFun ~ due_dateArr:", due_dateArr)
 // ------------------------------------------------------------------------------------------------
 
  // 步骤八
-// 缴纳截止日期
+// 备注
 // const {due_dateArr} = due_dateFun(periodStarts);
 // console.log("🚀 ~ paymentMainFun ~ due_dateArr:", due_dateArr)
 

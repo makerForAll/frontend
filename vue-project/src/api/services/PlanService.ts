@@ -2,7 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { PlanDTO } from '../models/PlanDTO';
+import type { CreatePlanDTO } from '../models/CreatePlanDTO';
+import type { UpdatePlanDTO } from '../models/UpdatePlanDTO';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class PlanService {
@@ -129,7 +130,7 @@ export class PlanService {
         requestBody,
     }: {
         id: string,
-        requestBody: PlanDTO,
+        requestBody: UpdatePlanDTO,
     }): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'PUT',
@@ -169,7 +170,7 @@ export class PlanService {
         requestBody,
     }: {
         clientId: string,
-        requestBody: PlanDTO,
+        requestBody: CreatePlanDTO,
     }): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'POST',

@@ -1,7 +1,7 @@
 import type { Dayjs } from "dayjs";
 import { ref } from "vue";
-
-
+// import 'dayjs/locale/zh-cn';
+// dayjs.locale('cn');
 /**
  * 获取 指定月份 的天数
  * @param {Dayjs} dateObj - Dayjs

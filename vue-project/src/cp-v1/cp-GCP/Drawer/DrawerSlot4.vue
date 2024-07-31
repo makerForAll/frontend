@@ -2,35 +2,34 @@
   <!-- 按钮 -->
   <a-button type="link" @click="showDrawer"> {{ action }}{{ entityType }} </a-button>
   <!-- 抽屉 -->
-  <a-drawer
-    v-if="isDelete"
-    :title="action+entityType"
-    :width="720"
-    :open="isOpen"
-    :body-style="{ paddingBottom: '80px' }"
-    :footer-style="{ textAlign: 'right' }"
-    @close="closeDrawer"
-    @AfterOpenChange="deleteDrawer"
-  >
+  <a-drawer v-if="isDelete" :title="action+entityType" :width="820" :open="isOpen"
+    :body-style="{ paddingBottom: '80px' }" :footer-style="{ textAlign: 'right' }" @close="closeDrawer"
+    @AfterOpenChange="deleteDrawer">
     <!-- 尝试组件 -->
+    <!-- <a-spin /> -->
     <!-- {{ form }} -->
+    <!-- {{ dayjs.isDayjs(internalForm['startdate_and_enddate'][0]) }} -->
     <a-form :model="internalForm" :rules="rules" layout="vertical">
-      <a-row :gutter="24">
+      <!-- <a-skeleton :loading="loading"> -->
+      <a-row :gutter="4">
         <template v-for="(field) in fields" :key="`${field.name}`">
           <a-col :span="field.span || 24">
-            <a-form-item :label="field.label" :name="`${field.name}`" :for="`${field.name}`" :style="field?.props?.style">
-               <!-- input 组件 -->
+            <a-form-item :label="field.labelNone?'':field.label" :name="`${field.name}`" 
+              :style="field?.props?.style">
+              <!-- input 组件 -->
               <template v-if="field.component === 'a-input'">
-                <a-input :id="`form_item_${field.name}`" :name="`form_item_${field.name}`" @input="fieldChange" @change="fieldChange" v-model:value="internalForm[field.name]" v-bind="field.props" />
+                <a-input :id="`form_item_${field.name}`" :name="`form_item_${field.name}`" @input="fieldChange"
+                  @change="fieldChange" v-model:value="internalForm[field.name]" v-bind="field.props" />
               </template>
               <!-- input 组件  数字相关处理-->
               <template v-else-if="field.component === 'a-input-number'">
-                <a-input-number :id="`form_item_${field.name}`" :name="`form_item_${field.name}`"  @input="fieldChange" @change="fieldChange" v-model:value="internalForm[field.name]" v-bind="field.props"/>
+                <a-input-number :id="`form_item_${field.name}`" :name="`form_item_${field.name}`" @input="fieldChange"
+                  @change="fieldChange" v-model:value="internalForm[field.name]" v-bind="field.props" />
                 <!-- <a-input-number id="inputNumber" v-model:value="value" :min="1" :max="10" /> -->
               </template>
-         
-                 <!-- input 组件  动态 字段添加-->
-                 <!-- <template v-else-if="field.component === 'a-input-dynamic'">
+
+              <!-- input 组件  动态 字段添加-->
+              <!-- <template v-else-if="field.component === 'a-input-dynamic'">
                 <a-input @input="fieldChange" @change="fieldChange" v-model:value="internalForm[field.name]" v-bind="field.props"/>
                 <a-input-number id="inputNumber" v-model:value="value" :min="1" :max="10" />
               </template> -->
@@ -77,27 +76,22 @@
                   添加字段
                 </a-button>
               </template> -->
-                <!-- ------a-input-dynami ------------------------------------------------------ -->  <!-- ------a-input-dynami ------------------------------------------------------ -->
+              <!-- ------a-input-dynami ------------------------------------------------------ -->
+              <!-- ------a-input-dynami ------------------------------------------------------ -->
               <!-- Select 组件 -->
               <template v-else-if="field.component === 'a-select'">
-                <a-select :id="`form_item_${field.name}`" :name="`form_item_${field.name}`" v-model:value="internalForm[field.name]" v-bind="field.props">
-                  <a-select-option
-                    v-for="option in field.props?.options_str"
-                    :key="option.value"
-                    :value="option.value"
-                  >
+                <a-select :id="`form_item_${field.name}`" :name="`form_item_${field.name}`" @change="fieldChange"
+                  v-model:value="internalForm[field.name]" v-bind="field.props">
+                  <a-select-option v-for="option in field.props?.options_str" :key="option.value" :value="option.value">
                     {{ option.label }}
                   </a-select-option>
                 </a-select>
               </template>
 
               <template v-else-if="field.component === 'a-select-number'">
-                <a-select :id="`form_item_${field.name}`" :name="`form_item_${field.name}`" v-model:value="internalForm[field.name]" v-bind="field.props">
-                  <a-select-option
-                    v-for="option in field.props?.options_num"
-                    :key="option.value"
-                    :value="option.value"
-                  >
+                <a-select :id="`form_item_${field.name}`" :name="`form_item_${field.name}`" @change="fieldChange"
+                  v-model:value="internalForm[field.name]" v-bind="field.props">
+                  <a-select-option v-for="option in field.props?.options_num" :key="option.value" :value="option.value">
                     {{ option.label }}
                   </a-select-option>
                 </a-select>
@@ -105,30 +99,65 @@
 
               <!-- Switch 组件 -->
               <template v-else-if="field.component === 'a-switch'">
-                <a-switch :id="`form_item_${field.name}`" :name="`form_item_${field.name}`"  v-model:checked="internalForm[field.name]" v-bind="field.props" />
+                <a-switch :id="`form_item_${field.name}`" :name="`form_item_${field.name}`" @change="fieldChange"
+                  v-model:checked="internalForm[field.name]" v-bind="field.props" />
               </template>
 
               <template v-else-if="field.component === 'a-range-picker'">
-               
-               <a-space direction="vertical" :size="12">
-              
-                <a-range-picker :id="`form_item_${field.name}`" :name="`form_item_${field.name}`" v-model:value="internalForm[field.name]" :presets="rangePresets" @calendarChange="onRangeChange"/>
-              </a-space>
-                
-                  <!-- <span>总天数：{{ totalDays }} 天</span> -->
+                <a-space direction="vertical" :size="12">
+                  <a-range-picker :id="`form_item_${field.name}`" :name="`form_item_${field.name}`"
+                    v-model:value="internalForm[field.name]" :presets="rangePresets" @calendarChange="onRangeChange" @change="fieldChange" @open-change="fieldChange"/>
+                </a-space>
               </template>
 
+
+
+           
               <template v-else-if="field.component === 'a-date-picker'">
-                <a-date-picker :id="`form_item_${field.name}`" :name="`form_item_${field.name}`" v-model:value="internalForm[field.name]" v-bind="field.props" @change="getFun"/>
-                  <!-- <p>总天数：{{ dayjs(internalForm[field.name]) }} 天</p> -->
-                  <p>总天数：{{ internalForm[field.name]}}天</p>
+                <a-date-picker :id="`form_item_${field.name}`" :name="`form_item_${field.name}`" @change="fieldChange" @open-change="fieldChange"
+                  v-model:value="internalForm[field.name]" v-bind="field.props" />
+               
+                <p>总天数：{{ internalForm[field.name]}}天</p>
               </template>
-              <template v-else-if="field.component === 'forInput'">
-                <!-- <a-divider style="height: 10px;border-color: #7cb305" dashed>{{ field.name }}</a-divider> -->
-                <!-- <a-divider  /> -->
-                <!-- <a-input :id="`form_item_${field.name}`" :name="`form_item_${field.name}`" @input="fieldChange" @change="fieldChange" v-model:value="internalForm[field.name]" v-bind="field.props" /> -->
-                <input>
-              </template>
+
+              <template v-else-if="field.component === 'a-input-group'">
+                <!-- 表头 -->
+                <a-row :id="`form_item_${field.name}`" :name="`form_item_${field.name}`" >
+                  <template  v-for="c, index in field.columns" :key="`${field?.name}_${c[index]}`">
+                    <a-col  :span="4" style="border:0.5px black dashed; text-align: center;">
+                      <span>
+                        {{ c }}
+                      </span>
+                      </a-col>
+                  </template>
+              </a-row>
+            <!-- 表体 -->
+           <a-row >
+                <template v-for="(item,index) in internalForm[field.name]" :key="`${field?.name}_${item[index]}`">
+                  <a-col  justify="center" :span="4" style="border:0.5px black dashed; text-align: center;"><span>{{ index }}</span></a-col>
+                  <template v-for="k in field.group" :key="k">
+                    <a-col :span="4" style="border:0.5px black dashed">
+                      <a-form-item style="height: auto;">
+
+                      <a-input-number v-if="k=='amount'" style="width: 105px;" v-model:value="item[k]" :id="`form_item_${field.name}_${k}_${index}`" @input="fieldChange"
+                  @change="fieldChange" :name="`form_item_${field.name}_${k}_${index}`" />
+
+                     <a-input v-else-if="k=='remarks'" style="width: 105px;" v-model:value="item[k]" :id="`form_item_${field.name}_${k}_${index}`" @input="fieldChange"
+                  @change="fieldChange" :name="`form_item_${field.name}_${k}_${index}`" />
+
+                     <a-date-picker v-else-if="k=='period_start'||'period_end'||'due_date'" v-model:value="item[k]" @change="fieldChange" @open-change="fieldChange"/>
+
+                     <a-input v-else style="width: 105px;" v-model:value="item[k]" :id="`form_item_${field.name}_${k}_${index}`" @input="fieldChange"
+                  @change="fieldChange" :name="`form_item_${field.name}_${k}_${index}`" />
+                    </a-form-item>
+                    </a-col>
+                  </template>
+                </template>
+              </a-row>
+
+              </template> 
+               <!-- group ----- end -->
+ 
               <template v-else-if="field.component === 'hr'">
                 <a-divider style="height: 10px;border-color: #7cb305" dashed>{{ field.name }}</a-divider>
                 <!-- <a-divider  /> -->
@@ -147,11 +176,13 @@
         </template>
       </a-row>
       {{ internalForm }}
+    <!-- </a-skeleton> -->
     </a-form>
 
     <!-- 操作区域 -->
     <template #extra>
       <a-space>
+        <a-button @click="generatePaymentDetails">生成支付明细</a-button>
         <a-button @click="closeDrawer">关闭</a-button>
         <a-button type="primary" @click="handleSubmit">提交</a-button>
       </a-space>
@@ -176,15 +207,13 @@ import enUS from 'ant-design-vue/es/locale/en_US';
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
 import dayjs, {type Dayjs } from 'dayjs';
 import 'dayjs/locale/zh-cn';
+dayjs.locale('cn');
 // import type { Plan } from '@/api/services/plan';
 
 // import type{CreatePlanDTO, DynamicField} from '@/generated/api';
-dayjs.locale('cn');
+
 // ----
 
-const getFun = async() =>{
-  console.log("value:",internalForm);
-}
 
 // ----- a-date-picker 组件的功能 -------
 type RangeValue = [Dayjs, Dayjs];
@@ -257,17 +286,22 @@ const onRangeChange = async(dates: RangeValue|null, dateStrings: string[]) => {
 export type Field = {                  // 表单 配置信息
     name: string, 
     label?: string,
+    labelNone?: boolean,
     type?: string,
     component: string,
+    columns?:string[],
+    group?:string[],
     props?: {
       placeholder?: string,
       options_str?: Array<{ value: string; label: string }>, // 修改这里的类型
       options_num?: Array<{ value: number; label: string }>, // 修改这里的类型
       addonAfter?:string,
       disabled?: boolean,
-      style?: {}
+      style?: {},
+      dataType?:unknown,
     },
-    span?: number                  // 空间划分
+    span?: number,               // 空间划分
+
   };
 
 // -----------------  抽屉功能 自身需要的基本功能 ---------------------------------
@@ -277,6 +311,7 @@ const props = defineProps<{
   modelValue: Record<string, any> , // 获取从 diy.vue 传递来的 form数据 
   fields?: Array<Field>,
   rules?: Record<string, Rule[]> ,   // 表单规则
+  loading?: boolean
 }>()
 
 
@@ -305,6 +340,8 @@ watch(
   } // 深度监听
 )
 
+// ---------------------------------
+
 
 const deleteDrawer = () => {
   if (isOpen.value == false) {
@@ -319,7 +356,12 @@ const closeDrawer = async () => {
 
 // ------------------------  触发 --------------------------------------------------
 
-const emit = defineEmits(['handleSubmit', 'showDrawer','fieldChange'])
+const emit = defineEmits(['generatePaymentDetails','handleSubmit', 'showDrawer','fieldChange'])
+
+const generatePaymentDetails = async() =>{
+  await emit('generatePaymentDetails');
+}
+
 
 const showDrawer = async () => {
   // await resetForm()
@@ -334,8 +376,8 @@ const handleSubmit = () => { // 提交到 diy.vue来 进行 数据库互动。  
   closeDrawer()
 }
 
-const fieldChange = () => { // input相关 表单 每次 @input时都会触发它，来更新本地的pinia数据。
-  emit('fieldChange', internalForm);
+const fieldChange = async() => { // input相关 表单 每次 @input时都会触发它，来更新本地的pinia数据。
+ await emit('fieldChange', internalForm);
 };
 // ---------- 动态表单 -------------
 interface Domain {
@@ -363,11 +405,5 @@ const addDomain = (fieldname: string | number) => {
   });
 };
 // ----  支付明细内容
-
-
-
 </script>
-
-
-
 <style scoped></style>

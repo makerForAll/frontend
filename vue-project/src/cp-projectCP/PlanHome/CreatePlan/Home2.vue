@@ -2,7 +2,7 @@
   <DrawerSlotView
     :action="'录入'"
     :entityType="'方案'"
-    v-model="planStore.data.item"
+    v-model="planStore.data.CItem"
     :fields="planFields"
     :rules="rules"
     @handleSubmit="handleSubmit"
@@ -19,9 +19,10 @@ import DrawerSlotView from '@/cp-v1/cp-GCP/Drawer/DrawerSlot4.vue'
 import { useClientStore } from '@/stores/client';
 import { usePlanStore } from '@/stores/plan'
 import type { Rule } from 'ant-design-vue/es/form'
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import type {Field} from '@/cp-v1/cp-GCP/Drawer/DrawerSlot4.vue';
-import type { PlanBackEndDTO } from '@/api';
+import type { CPlanVO } from '@/custom/api/models/models-plan';
+// import type { PlanBackEndDTO } from '@/api';
 
 // import {reactive } from 'vue';
 
@@ -264,12 +265,18 @@ const rules: Record<string, Rule[]> = {
 
 // -------------------------------------  pinia层 数据交互 -------------------------------------------------------------------
 // const {create, runCal } = usePlanStore()
+
 const clientState=useClientStore();
 const planStore = usePlanStore()
+onMounted(()=>{
+  planStore.initState();// 初始化
+})
+
 
 const showDrawer = async () => {
   // 重置form
   await planStore.initState()
+  // await planStore.initState();
   // planStore.data.item.client = planStore.data.selectID;
 }
 
@@ -277,6 +284,8 @@ const handleSubmit = async (form: any) => {
   // 获取的创建填入的数据，并使用pinia的方法来进行创建数据模型
   console.log("form数据:",form);
   // 创建plan 时，关联 指定ID的Client
+  // 先要初始化
+  
   await planStore.create(clientState.data.selectID as string,form);
 }
 
@@ -299,7 +308,7 @@ const handleSubmit = async (form: any) => {
 //   third_price: 0,
 // });
 
-const fieldChange = async (form: PlanBackEndDTO) => {
+const fieldChange = async (form: CPlanVO) => {
 // 【响应式】检查 payment 中的 对象结构，如果有匹配的内容，就把 对应的 表单匹配信息 加入 planFields 中
 // payment中指 create payment时，几个关键的字段在修改数据时，会触发pinia层的计算，得出1个 payment的对象结构。
   // 思考
@@ -315,9 +324,9 @@ console.log("form---------------:",form);
     // 如果 有内容，开始识别，构建 在 planFields 中添加几个表单的json信息，然后添加 到 planFields【动态的】
 
 // --------------------------------------------------
-planStore.runCal(); // 计算 总面积 和 平均单价
+planStore.runCal('create'); // 计算 总面积 和 平均单价
 
-planStore.data.item = form
+planStore.data.CItem = form
 
 }
 // -------------------------------------  pinia层 数据交互 -------------------------------------------------------------------

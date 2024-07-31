@@ -26,7 +26,7 @@
         @edit="onEdit"
       >
         <a-tab-pane
-          v-for="pane in planStore.data.items"
+          v-for="pane in planStore.data.RItems"
           :key="pane.id"
           :tab="pane.name"
           :closable="false"
@@ -123,7 +123,7 @@
               </slot>
               <h4>合同租金缴纳详情</h4>
               <!-- <a-table :dataSource="dataSource" :columns="columnsTwo" /> -->
-              <table border="1" v-if="pane?.payment_detail">
+              <table border="1" v-if="pane?.payment_detail_item">
               <thead>
                 <tr>
                   <td>期数</td>
@@ -135,12 +135,10 @@
                 </tr>
               </thead>
               <div>
-
               </div>
-    
-              <tbody v-for="(payment,index) in pane.payment_detail.payment_details" :key="index">
+              <tbody v-for="(payment,index) in pane.payment_detail_item" :key="index">
               <tr >
-                <td>{{ index}}</td>
+                <td>{{ index}}</td>  
                 <td>{{ dayjs(payment?.period_start).format('YYYY-MM-DD') }}</td>
                 <td>{{ dayjs(payment?.period_end).format('YYYY-MM-DD') }}</td>
                 <td>{{ payment?.amount }}</td>
@@ -171,7 +169,7 @@ import { onMounted, reactive, ref, watch } from 'vue'
 import { usePagination } from 'vue-request'
 import { usePlanStore } from '@/stores/plan'
 import { useClientStore } from '@/stores/client'
-import type{PlanBackEndDTO} from '@/api';
+// import type{PlanBackEndDTO} from '@/api';
 import dayjs from 'dayjs';
 const planStore = usePlanStore()
 const clientStore = useClientStore()
