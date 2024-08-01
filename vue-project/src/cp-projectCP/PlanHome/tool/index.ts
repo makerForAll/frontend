@@ -1,14 +1,15 @@
-import type { PlanDTO } from '@/api';
+// import type { PlanDTO } from '@/api';
 import { calculateAmountsAndPeriods, calculateMonthsArray, calculatePeriodDates, calculatePeriodDates2, calculatePeriodDates3, due_dateFun, paymentAmountCycleArray, remarksFun, resultsFun, transferArrayFun } from './helpersFun-payment';
 import { calculateTotalMonthsAndDays } from './helpersFun-dayjs';
 // import dayjs from 'dayjs';
 import type { PaymentDetailItemVO } from '@/cp-projectCP/PaymentDetailItemHome/Vo/PaymentDetailItem.vo';
 
 import dayjs, {type Dayjs } from 'dayjs';
+import type { RPlanVO } from '@/custom/api/models/models-plan';
 // import 'dayjs/locale/zh-cn';
 // dayjs.locale('cn');
 // 定义函数，接收计划数据并返回相关计算结果
-export function paymentMainFun(plan: PlanDTO) {
+export function paymentMainFun(plan: RPlanVO) {
 //-------------------------------------
 const startdate = dayjs(plan.startdate_and_enddate?.[0]);
 console.log("🚀 ~ paymentMainFun ~ startdate:", startdate)
@@ -24,7 +25,12 @@ const {
     fullMonths,
     lastMonthDays,
     countDaysInMonth} = calculateTotalMonthsAndDays(startdate,enddate);
-console.log("culateTotalMonthsAndDays:",currentMonths);
+    console.log("currentMonths:",currentMonths);
+    console.log("🚀 ~ paymentMainFun ~ lastMonthDays:", lastMonthDays)
+    console.log("🚀 ~ paymentMainFun ~ fullMonths:", fullMonths)
+    console.log("🚀 ~ paymentMainFun ~ countDaysInMonth:", countDaysInMonth)
+    ///// 通过考核！！！！！！！！！！！！！！！！！
+
 /**
  * 得到 
  * currentMonths 总月数
@@ -48,10 +54,28 @@ const {amountsArr,periods} = calculateAmountsAndPeriods(plan,currentMonths);
  * 得到 
  * amountsArr 增长周期 数组
  * periods 增长金额周期 数组
+ * 
+ * // 测试范围 [面积：100，价格：30]
+ * 合同期限 3年       ，增长周期 每12年，增长率 0 ，periods:【12,12,12】, amountsArr:[36000, 36000, 36000] 【通过】
+ * 合同期限 3年       ，增长周期 每12年，增长率 6 ，periods:【12,12,12】, amountsArr:[36000, 38160, 40450] 【通过】
+ * --------------------------
+ * 合同期限 1年1个月多 ，增长周期 每12年，增长率 0 ，periods:【12,1.27】, amountsArr:[36000, 3810]
+ * currentMonths: 13.266666 [总月数，点化]
+ * currentMonthPeriod: 12 【增长周期】
+ * 合同期限 1年1个月多 ，增长周期 每12年，增长率 6 ，periods:【12,1.27】, amountsArr:[36000, 4039]
+ * 
+ * 
+ * -------
+ * 
+ * 1年1个月多不行。。。出问题
  * ----------------------------------------------
 */
-console.log("🚀 ~ paymentMainFun ~ periods:", periods)
-console.log("🚀 ~ paymentMainFun ~ amountsArr:", amountsArr)
+console.log("🚀 ~ paymentMainFun ~ periods:增长周期 数组----", periods)
+console.log("🚀 ~ paymentMainFun ~ amountsArr:增长金额周期 数组----", amountsArr)
+
+// 
+
+
 
 // ------------------------------------------------------------------------------------------------
 // 步骤三
@@ -66,6 +90,10 @@ console.log("🚀 ~ paymentMainFun ~ amountsArr:", amountsArr)
  /**
  * 得到 
  * 租金支付的月份周期 数组
+ * --------- 测试 ------------ 
+ * // 测试范围 [面积：100，价格：30]
+ * 合同期限 3年       ，增长周期 每12年，增长率 0 ，periods:【12,12,12,0】
+ * 合同期限 3年       ，增长周期 每12年，增长率 6 ，periods:【12,12,12】
  * ----------------------------------------------
 */
  // ------------------------------------------------------------------------------------------------
@@ -83,6 +111,7 @@ console.log("🚀 ~ paymentMainFun ~ transferArraytest:", transferArray)
 
  // ------------------------------------------------------------------------------------------------
 // 步骤五
+// 最终效果支付明细金额
 // 将中转数据 按照排序填充到 新数组中【对比 支付 周期 规律 数组】
 /**
  * 

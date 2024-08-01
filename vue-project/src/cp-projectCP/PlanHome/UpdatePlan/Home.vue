@@ -231,7 +231,6 @@ const planFields:Field[] = [
   { name: 'rent_free_months', label: 'JM', component: 'a-input-number', props: { placeholder: 'Enter rent free (months)' , addonAfter:"月"} ,span: 8},
   { name: 'remarks', label: '备注信息', component: 'a-input', props: { placeholder: 'Enter remarks'} },
   { name: '支付明细', component: 'hr', props: { placeholder: 'Enter remarks'} },
-  { name: '支付明细', component: 'hr', props: { placeholder: 'Enter remarks'} },
   {
     name: 'payment_detail_item',
     label: '支付明细',

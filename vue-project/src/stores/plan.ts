@@ -211,6 +211,12 @@ export const usePlanStore = defineStore('plan', {
       this.data.loading = true;
       try {
         const response:ApiResponse<RPlanVO> = await api.plan.planControllerFindByClientId({id});
+        // 调整paymentItem中的排序
+        response.results.data[0].payment_detail_item?.sort((a, b) => {
+          if (a.period_start.isBefore(b.period_start)) return -1;
+          if (a.period_start.isAfter(b.period_start)) return 1;
+          return 0;
+        });
         this.data.RItems = response.results.data;
         this.data.total = response.results.total as number;
         console.log("readByClientId--------",response.results.data);

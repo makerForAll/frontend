@@ -138,7 +138,7 @@
               </div>
               <tbody v-for="(payment,index) in pane.payment_detail_item" :key="index">
               <tr >
-                <td>{{ index}}</td>  
+                <td>{{ index+1}}</td>  
                 <td>{{ dayjs(payment?.period_start).format('YYYY-MM-DD') }}</td>
                 <td>{{ dayjs(payment?.period_end).format('YYYY-MM-DD') }}</td>
                 <td>{{ payment?.amount }}</td>

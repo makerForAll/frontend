@@ -5,6 +5,7 @@ import { limitDecimalPlaces } from "./helpersFun-dayjs";
 import type { PaymentDetailItemVO } from "@/cp-projectCP/PaymentDetailItemHome/Vo/PaymentDetailItem.vo";
 import type { Field } from "@/cp-v1/cp-GCP/Drawer/DrawerSlot4.vue";
 import type { PlanDTO } from "./calPayment2";
+import type { RPlanVO } from "@/custom/api/models/models-plan";
 // import 'dayjs/locale/zh-cn';
 
 // dayjs.locale('cn');
@@ -53,13 +54,13 @@ export function calculatePeriodDates(planObj: PlanDTO) {
 
 /**
  * 计算每期的开始和结束日期
- * @param {PlanDTO} planObj - 包含合同信息的对象，包括起始和截止日期、免租期及付款间隔
+ * @param {RPlanVO} planObj - 包含合同信息的对象，包括起始和截止日期、免租期及付款间隔
  * @returns {{ periodStarts: string[], periodEnds: string[], numberOfPeriods: number }} 
  * - 返回每期的开始日期和结束日期数组，以及期数
  */
-export function calculatePeriodDates2(planObj: PlanDTO,fullMonths:number,lastMonthDays:number,otherValue:number[]) {
+export function calculatePeriodDates2(planObj: RPlanVO,fullMonths:number,lastMonthDays:number,otherValue:number[]) {
     const startDate = dayjs(planObj.startdate_and_enddate?.[0]); // 合同起始日期
-    const endDate = dayjs(planObj.startdate_and_enddate?.[1]); // 合同截止日期
+    let endDate = dayjs(planObj.startdate_and_enddate?.[1]); // 合同截止日期
 
     const rentFreeMonths = planObj.rent_free_months ?? 0; // 免租期
     const paymentIntervalMonths = planObj.payment_interval_months ?? 1; // 付款间隔，避免除以零
@@ -81,6 +82,7 @@ export function calculatePeriodDates2(planObj: PlanDTO,fullMonths:number,lastMon
     calFullMonths = calFullMonths - rentFreeMonths;
     // periodStarts.push(calMonthsDate.format('YYYY/MM/DD'));
     periodStarts.push(calMonthsDate);
+    
     while(calFullMonths>=paymentIntervalMonths && calOtherValue != otherValue.length-1){
 
         calMonthsDate = calMonthsDate.add(paymentIntervalMonths,'month');
@@ -90,15 +92,28 @@ export function calculatePeriodDates2(planObj: PlanDTO,fullMonths:number,lastMon
         // console.log("------------------ok,",periodStarts,periodEnds);
         calFullMonths -= paymentIntervalMonths;
         calOtherValue += 1;
+        console.log("calFullMonths-----------------:",calFullMonths);
+        
     }
 
+    // if(calFullMonths!=0){ // 如果还有余数，就把余下的日期加入进去
+    //     calMonthsDate = calMonthsDate.add(calFullMonths,'month');
+    //     calMonthsDate = calMonthsDate.add(lastMonthDays,'day');
+    //     periodStarts.push(calMonthsDate)
+    // }
 
-    calMonthsDate = calMonthsDate.add(lastMonthDays,'day');
 
-    //-----
-    calMonthsDate = calMonthsDate.add(calFullMonths,'month');
+
+    if(rentFreeMonths!=0){ // 如果 有减免的情况，就在末尾把
+        endDate = endDate.subtract(rentFreeMonths,'month');
+        endDate = endDate.subtract(1,'day');
+        periodStarts.push(endDate)
+    }
+    
+   
+
     // periodStarts.push(calMonthsDate.format('YYYY/MM/DD'))
-    periodStarts.push(calMonthsDate)
+    
 
     // ----------------------------------------------------------------------------------
 
@@ -147,7 +162,7 @@ export function calculatePeriodDates2(planObj: PlanDTO,fullMonths:number,lastMon
 
 
 // 期间结束 数组
-export function calculatePeriodDates3(planObj: PlanDTO,fullMonths:number,lastMonthDays:number,otherValue:number[]) {
+export function calculatePeriodDates3(planObj: RPlanVO,fullMonths:number,lastMonthDays:number,otherValue:number[]) {
     const startDate = dayjs(planObj.startdate_and_enddate?.[0]); // 合同起始日期
     const endDate = dayjs(planObj.startdate_and_enddate?.[1]); // 合同截止日期
     const totalMonths = endDate.diff(startDate, 'month') + 1; // 总月数
@@ -204,7 +219,7 @@ export function calculatePeriodDates3(planObj: PlanDTO,fullMonths:number,lastMon
 * amountsArr: number[] // 增长金额周期 数组
 * }} - 返回金额数组和周期数组
 */
-export function calculateAmountsAndPeriods(plan: PlanDTO,currentMonths:number) {
+export function calculateAmountsAndPeriods(plan: RPlanVO,currentMonths:number) {
    const increaseIntervalMonths = plan.increase_interval_months as number; // 增长间隔月数
    const increaseRate = plan.increase_rate as number; // 增长率
    const initialMonthlyPrice = plan.initial_monthly_price as number; // 初始月价格
@@ -228,7 +243,7 @@ export function calculateAmountsAndPeriods(plan: PlanDTO,currentMonths:number) {
  * @param {any} currentMonthPeriod:number
  * @returns {any}
  */
-export function getPeriodsArr(plan:PlanDTO,currentMonths:number,currentMonthPeriod:number){
+export function getPeriodsArr(plan:RPlanVO,currentMonths:number,currentMonthPeriod:number){
     const rent_free_months = plan.rent_free_months as number;
     console.log("currentMonths-",currentMonths);
     console.log("currentMonthPeriod-",currentMonthPeriod);
@@ -263,7 +278,7 @@ export function getPeriodsArr(plan:PlanDTO,currentMonths:number,currentMonthPeri
    * @param {any} increaseRate:number
    * @returns {any}
    */
-  function calAmountGrowthCycle(plan:PlanDTO,periods:number[],currentPrice:number,increaseRate:number){ 
+  function calAmountGrowthCycle(plan:RPlanVO,periods:number[],currentPrice:number,increaseRate:number){ 
     console.log("periods-",periods);
     console.log("currentPrice-",currentPrice);
     console.log("increaseRate-",increaseRate);
@@ -296,24 +311,29 @@ export function getPeriodsArr(plan:PlanDTO,currentMonths:number,currentMonthPeri
  * @param {any} plan:PlanDTO
  * @returns {any}
  */
-export function calculateMonthsArray(plan:PlanDTO,currentMonths:any) {
+export function calculateMonthsArray(plan:RPlanVO,currentMonths:any) {
     const rentFreeMonths = plan.rent_free_months ?? 0; // 免租期
     const paymentIntervalMonths = plan.payment_interval_months ?? 1; // 付款间隔，避免除以零
 
     // eslint-disable-next-line prefer-const
     let rentPaymentMonthsCycleArray:number[] = [];
 
-    let calCurrentMonths = currentMonths;
+    let calCurrentMonths = currentMonths; // 当前总月份
     // 减免 方面处理 【先减去减免部分 储存起来，等待 插入前面的数据完成后，最后再插入减免部分】
     calCurrentMonths = calCurrentMonths - rentFreeMonths;
 
     while (calCurrentMonths>paymentIntervalMonths) {
+        // console.log("calCurrentMonths@:",calCurrentMonths);
+        
         rentPaymentMonthsCycleArray.push(Number(paymentIntervalMonths));
         calCurrentMonths -= paymentIntervalMonths;
     }
     // console.log("🚀 ~ calculateMonthsArray ~ rentPaymentMonthsCycleArray1:", rentPaymentMonthsCycleArray)
     rentPaymentMonthsCycleArray.push(Number(limitDecimalPlaces(calCurrentMonths,2)));
-    rentPaymentMonthsCycleArray.push(Number(rentFreeMonths));
+    if(rentFreeMonths!=0){ // 如果存在减免，才把减免部分放入该数组。
+        rentPaymentMonthsCycleArray.push(Number(rentFreeMonths));
+    }
+    
     console.log("🚀 ~ calculateMonthsArray ~ --------- gaga ------------:", rentPaymentMonthsCycleArray)
     return {rentPaymentMonthsCycleArray};
   }
@@ -327,23 +347,25 @@ export function calculateMonthsArray(plan:PlanDTO,currentMonths:any) {
  * @returns {any}
  */
 
- export function transferArrayFun(plan:PlanDTO, periods:number[],amountsArr:number[]){
+ export function transferArrayFun(plan:RPlanVO, periods:number[],amountsArr:number[]){
     
     // const pim = plan?.payment_interval_months as number; // 支付周期f
     
     const priceArr:number[] = [];
     const myPeriods:number[] = periods;
-    console.log("🚀 ~ myPeriods", myPeriods) // 没问题 【12,12,6,6】
-    console.log("🚀 ~ amountsArr:", amountsArr)
-    // 获得单价
+    const precision:number = 0.1;
+    console.log("🚀 ~ myPeriods", myPeriods)    // 没问题 【12,12,6,6】，【12,2.27】
+    console.log("🚀 ~ amountsArr:", amountsArr) // 金额数组 【36000, 7219】 最终到【36000, 5851】
+    // 获得单价 --------------------------------------
     for (let index = 0; index < myPeriods.length; index++) {
         const Periods = myPeriods[index];
         const AmountsArr = amountsArr[index];
-        const getvalue = AmountsArr/Periods*0.1;
+        const getvalue = AmountsArr/Periods*0.0001;
         priceArr.push(getvalue);
     }
 
     console.log("🚀 ~ transferArrayFun ~ priceArr:", priceArr) // 没问题
+    // 通过单价，为单位，慢慢传递到新数组中
    // --------------------------------------------------------------------------
     const transferArray:number[] = [];
     // eslint-disable-next-line prefer-const
@@ -354,7 +376,7 @@ export function calculateMonthsArray(plan:PlanDTO,currentMonths:any) {
     for (let k = 0; k < myPeriods.length; k++) {
         // console.log("kkk--",k,"---", myPeriods.length,"--",myPeriods[k]);
         ;
-         for (let j = 0.1; j < myPeriods[k]; j+=0.1) {
+         for (let j = 0.0001; j < myPeriods[k]; j+=0.0001) {
             // console.log("mmmm--jj",limitDecimalPlaces(j,1)); // 单价
             // console.log("mmmm--",priceArr[k]); // 单价
             // console.log("mmmm--2"); // 没问题
@@ -364,7 +386,7 @@ export function calculateMonthsArray(plan:PlanDTO,currentMonths:any) {
          }
         
         }
-        // console.log("🚀 ~ ------------------------------:")
+        console.log("🚀 ~ -------------transferArray-----------------:",transferArray)
         return {transferArray};
     }
 
@@ -376,10 +398,17 @@ export function calculateMonthsArray(plan:PlanDTO,currentMonths:any) {
  * @returns {any}
  */
 
-  export  function paymentAmountCycleArray(plan:PlanDTO,rpmca:number[],ta:number[]){
-    console.log("🚀 ~ paymentAmountCycleArray ~ Array1:", ta)  // 数据中转库
+  export  function paymentAmountCycleArray(plan:RPlanVO,rpmca:number[],ta:number[]){
+    // 金额周期 [36000, 5851]
+    // 单价周期 [0.3, 0.3179891]
+    // [120000,18400]
+
+    // 支付周期 [12,1.84]
+    // 精度比就是 条数 / 周期里的对应的值。
+    const precision:number = 0.0001; // 精度
+    console.log("🚀 ~ paymentAmountCycleArray ~ Array1:", ta)  // 数据中转库 [] 数组中如果有138400 个数据
     
-    console.log("🚀 ~ paymentAmountCycleArray ~ Array2:", rpmca) // 支付周期
+    console.log("🚀 ~ paymentAmountCycleArray ~ Array2:", rpmca) // 支付周期 【12,1.84】
     
         // eslint-disable-next-line prefer-const
         let paymentAmountArr:number[] = [];
@@ -388,22 +417,29 @@ export function calculateMonthsArray(plan:PlanDTO,currentMonths:any) {
         let calValue:number = 0;
          // eslint-disable-next-line prefer-const
         let saveData:number = 0;
-        for (let i = 0; i < rpmca.length; i++) {
+        for (let i = 0; i < rpmca.length; i++) { // 按 支付周期的 频率 ，把每个序号上的数据，循环积累出来。【12,1.84】
             // const element = array[index];
-            for (let j = 0; j < rpmca[i]*10; j++) {
+            for (let j = 0; j < rpmca[i]; j+=0.0001) {
                 // const element = array[index];
-                if(rpmca[i] != 0){
-                    saveData += ta[calValue];
-                    calValue += 1;
+                // console.log("saveData---过程计算-j--",j)
+                // console.log("saveData---过程计算-rpmca[i]--",rpmca[i])
+                if(ta[limitDecimalPlaces(calValue/0.0001,0)]){
+                    
+                    saveData += ta[limitDecimalPlaces(calValue/0.0001,0)];
+                    // console.log("saveData---过程计算---",calValue/0.0001)
+                    calValue += 0.0001;
+                    // console.log("saveData------",saveData);
+                    
                 }
                 
             }
-            console.log("🚀 ~ paymentAmountCycleArray ~ saveData:", saveData)
+            
             paymentAmountArr.push(limitDecimalPlaces(saveData,0));
+            console.log("🚀 ~ paymentAmountCycleArray ~ paymentAmountArr:", paymentAmountArr)
             saveData = 0;
         }
            
-        if(plan.rent_free_months != 0){
+        if(plan.rent_free_months != 0){ // 如果有减免的话
             paymentAmountArr[paymentAmountArr.length-1] = 0;
         }
 
@@ -474,7 +510,7 @@ export function due_dateFun(periodStarts:Dayjs[]){
  * @param {any} rentPaymentMonthsCycleArray:number[]
  * @returns {any}
  */
-export function remarksFun(plan:PlanDTO,rentPaymentMonthsCycleArray:number[]){
+export function remarksFun(plan:RPlanVO,rentPaymentMonthsCycleArray:number[]){
     const remarksArr:string[] = [];
     for (let index = 0; index < rentPaymentMonthsCycleArray.length; index++) {
         // const element = rentPaymentMonthsCycleArray[index];
