@@ -5,7 +5,7 @@
                        
                   </template>
                   <template #1-container>
-                        <ReadClientView>
+                        <ReadClientView :url="'test'">
                               <template #headerHandle>
                                     <CreateClientView></CreateClientView>
                               </template>

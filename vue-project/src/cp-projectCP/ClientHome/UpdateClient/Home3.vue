@@ -24,6 +24,20 @@ import type { Rule } from 'ant-design-vue/es/form';
 // --------------------------  表单配置 ------------------------------------------------------------------------------
 // 字段 表单参数配置
 const clientFields = [
+{
+    name: 'tags',
+    label: '标签',
+    component: 'a-select-number',
+    props: {
+      options_num: [
+        { value: 1, label: '待开发' },
+        { value: 2, label: '关注中' },
+        { value: 3, label: '最近正在签约中' },
+        { value: 4, label: '归档' }
+      ]
+    },
+    span: 8
+  },
   { name: 'name', label: '乙方名称', component: 'a-input', props: { placeholder: 'Enter client name' } },
   { name: 'contact', label: '联系人', component: 'a-input', props: { placeholder: 'Enter phone number' } },
   { name: 'phonenumber', label: '联系号码', component: 'a-input', props: { placeholder: 'Enter phone number' } },
@@ -35,10 +49,12 @@ const clientFields = [
 
 // 字段 规则配置
 const rules: Record<string, Rule[]> = {
+  tags: [{ required: false, message: 'Please enter phone number' }],
   name: [{ required: true, message: 'Please enter client name' }],
   contact: [{ required: true, message: 'Please enter phone number' }],
   phonenumber: [{ required: true, message: 'Please enter phone number' }],
   emergencycontact: [{ required: false, message: 'Please enter phone number' }],
+
   emergencycontactphone: [{ required: false, message: 'Please enter phone number' }],
   marks: [{ required: false, message: 'Please enter phone number' }],
   // 其他字段的验证规则可以按需添加

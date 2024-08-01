@@ -85,7 +85,8 @@ export const useClientStore = defineStore('client', {
     },
     async read(params:any= {
      current: 1,
-     pagesize: 10
+     pagesize: 10,
+     
     }) { // 异步编程获取数据
       try {
         const response:ApiResponse<ClientDTO> = await api.client.clientControllerFindAll(params);

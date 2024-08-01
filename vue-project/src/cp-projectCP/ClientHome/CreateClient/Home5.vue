@@ -33,6 +33,20 @@ import { onMounted, reactive, toRaw } from 'vue';
 // --------------------------  表单配置 ------------------------------------------------------------------------------
 
 const clientFields:Field[] = [
+{
+    name: 'tags',
+    label: '标签',
+    component: 'a-select-number',
+    props: {
+      options_num: [
+        { value: 1, label: '待开发' },
+        { value: 2, label: '关注中' },
+        { value: 3, label: '最近正在签约中' },
+        { value: 4, label: '归档' }
+      ]
+    },
+    span: 8
+  },
   { name: 'name', label: '乙方', component: 'a-input', props: { placeholder: '请输入乙方名称' } },
   { name: 'contact', label: '联系人', component: 'a-input', props: { placeholder: '请输入联系人名称' } },
   { name: 'phonenumber', label: '联系人号码', component: 'a-input', props: { placeholder: '请输入联系人号码' } },
@@ -44,6 +58,7 @@ const clientFields:Field[] = [
 ];
 
 const rules: Record<string, Rule[]> = {
+  tags: [{ required: false, message: 'Please enter phone number' }],
   name: [{ required: true, message: '请输入正确的名称' }],
   contact: [{ required: false, message: '请输入号码' }],
   phonenumber: [{ required: false, message: '请输入正确的名称' }],
